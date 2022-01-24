@@ -9,9 +9,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.XboxController;
+//import edu.wpi.first.wpilibj.XboxController;
 //import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Joystick;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -30,15 +31,17 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   
   private DifferentialDrive m_myRobot;
-  private final CANSparkMax m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
-  private final CANSparkMax m_frontRight = new CANSparkMax(2, MotorType.kBrushless);
-  private final CANSparkMax m_rearLeft = new CANSparkMax(3, MotorType.kBrushless);
-  private final CANSparkMax m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
+  private CANSparkMax m_frontLeft;
+  private CANSparkMax m_frontRight;
+  private CANSparkMax m_rearLeft;
+  private CANSparkMax m_rearRight;
 
-  MotorControllerGroup m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
-  MotorControllerGroup m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
+  private MotorControllerGroup m_left;
+  private MotorControllerGroup m_right;
 
-  private final XboxController m_controller = new XboxController(0);
+  //private final XboxController m_controller = new XboxController(0);
+  private Joystick m_leftStick;
+  private Joystick m_rightStick;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -51,6 +54,21 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Auto choices", m_chooser);
 
     m_myRobot = new DifferentialDrive(m_left, m_right);
+    m_leftStick = new Joystick(0);
+    m_rightStick = new Joystick(1);
+
+    m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
+    m_frontRight = new CANSparkMax(2, MotorType.kBrushless);
+    m_rearLeft = new CANSparkMax(3, MotorType.kBrushless);
+    m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
+
+    m_frontLeft.restoreFactoryDefaults();
+    m_frontRight.restoreFactoryDefaults();
+    m_rearLeft.restoreFactoryDefaults();
+    m_rearRight.restoreFactoryDefaults();
+
+    m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
+    m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
   }
 
   /**
@@ -120,6 +138,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    m_myRobot.tankDrive(m_controller.getLeftY(), m_controller.getRightY());
+    m_myRobot.tankDrive(m_leftStick.getY(), m_rightStick.getY());
   }
 }
