@@ -30,9 +30,9 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   
   private DifferentialDrive m_myRobot;
-  private final CANSparkMax m_frontLeft = new CANSparkMax(2, MotorType.kBrushless);
-  private final CANSparkMax m_frontRight = new CANSparkMax(3, MotorType.kBrushless);
-  private final CANSparkMax m_rearLeft = new CANSparkMax(4, MotorType.kBrushless);
+  private final CANSparkMax m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
+  private final CANSparkMax m_frontRight = new CANSparkMax(2, MotorType.kBrushless);
+  private final CANSparkMax m_rearLeft = new CANSparkMax(3, MotorType.kBrushless);
   private final CANSparkMax m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
 
   MotorControllerGroup m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
