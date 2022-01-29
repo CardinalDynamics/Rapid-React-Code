@@ -4,18 +4,18 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-//import edu.wpi.first.wpilibj.XboxController;
-//import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Joystick;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -39,9 +39,9 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_left;
   private MotorControllerGroup m_right;
 
-  //private final XboxController m_controller = new XboxController(0);
-  private Joystick m_leftStick;
-  private Joystick m_rightStick;
+  private final XboxController m_controller = new XboxController(0);
+
+  private boolean lemonLight;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -52,10 +52,6 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-
-    m_myRobot = new DifferentialDrive(m_left, m_right);
-    m_leftStick = new Joystick(0);
-    m_rightStick = new Joystick(1);
 
     m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
     m_frontRight = new CANSparkMax(2, MotorType.kBrushless);
@@ -69,6 +65,13 @@ public class Robot extends TimedRobot {
 
     m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
+    m_myRobot = new DifferentialDrive(m_left, m_right);
+
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+
+    lemonLight = false;
   }
 
   /**
@@ -121,11 +124,27 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+    
+    if (m_controller.getYButtonPressed() == true) {
+      lemonLight = !lemonLight;
+    }
+
+    if (lemonLight == true) {
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    } else if (lemonLight == false) {
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    }
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    m_controller.setRumble(RumbleType.kLeftRumble, 0.0);
+    m_controller.setRumble(RumbleType.kRightRumble, 0.0);
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -138,6 +157,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    m_myRobot.tankDrive(m_leftStick.getY(), m_rightStick.getY());
+    //m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+    m_myRobot.arcadeDrive(m_controller.getLeftX(), -m_controller.getLeftY());
   }
 }
