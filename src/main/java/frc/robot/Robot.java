@@ -49,8 +49,8 @@ public class Robot extends TimedRobot {
   private VictorSPX m_elevator2;
   private VictorSPX m_cargoSlurper;
 
-  private TalonSRX m_climb1;
-  private TalonSRX m_climb2;
+  private TalonSRX m_shoulder;
+  private TalonSRX m_winch;
 
   private MotorControllerGroup m_left;
   private MotorControllerGroup m_right;
@@ -84,8 +84,8 @@ public class Robot extends TimedRobot {
     m_cargoSlurper = new VictorSPX(10);
 
     //climb motors
-    m_climb1 = new TalonSRX(11);
-    m_climb2 = new TalonSRX(12);
+    m_shoulder = new TalonSRX(11);
+    m_winch = new TalonSRX(12);
 
     m_frontLeft.restoreFactoryDefaults();
     m_frontRight.restoreFactoryDefaults();
@@ -114,10 +114,10 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     uptime = Timer.getFPGATimestamp();
     SmartDashboard.putNumber("Uptime", uptime);
-    SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
   }
 
   /**
@@ -160,13 +160,29 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
     
-    if (m_controller2.getXButtonPressed()) {
+    if (m_controller.getAButton() == true) {
+      m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+    } else {
+      m_cargoSlurper.set(ControlMode.PercentOutput, 0);
+    }
+
+    if (m_controller2.getXButton() == true) {
       m_frontShooter.set(ControlMode.PercentOutput, 100);
       m_backShooter.set(ControlMode.PercentOutput, 100);
+    } else {
+      m_frontShooter.set(ControlMode.PercentOutput, 0);
+      m_backShooter.set(ControlMode.PercentOutput, 0);
     }
-    if (m_controller.getAButtonPressed()) {
-      m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+
+    if (m_controller2.getAButton() == true) {
+      m_elevator1.set(ControlMode.PercentOutput, 100);
+      m_elevator2.set(ControlMode.PercentOutput, 100);
+    } else {
+      m_elevator1.set(ControlMode.PercentOutput, 0);
+      m_elevator2.set(ControlMode.PercentOutput, 0);
     }
+
+    
   }
 
   /** This function is called once when the robot is disabled. */
