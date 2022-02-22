@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
+//import edu.wpi.first.wpilibj.DoubleSolenoid;
 //import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Compressor;
@@ -69,7 +69,7 @@ public class Robot extends TimedRobot {
   private final XboxController m_controller2 = new XboxController(1);
 
   // Pneumatics
-  private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
+  //private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
   private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
   boolean enabled = compressor.enabled();
@@ -203,16 +203,14 @@ public class Robot extends TimedRobot {
     //intake
     if (m_controller.getAButtonPressed()) {
       m_cargoSlurper.set(ControlMode.PercentOutput, 100);
-    }
-    else{
+    } else {
       m_cargoSlurper.set(ControlMode.PercentOutput, 0);
     }
     //launcher
     if (m_controller2.getXButtonPressed()) {
       m_frontShooter.set(ControlMode.PercentOutput, 100);
       m_backShooter.set(ControlMode.PercentOutput, 100);
-    }
-    else{
+    } else {
       m_frontShooter.set(ControlMode.PercentOutput, 0);
       m_backShooter.set(ControlMode.PercentOutput, 0);
     } 
@@ -220,13 +218,24 @@ public class Robot extends TimedRobot {
     if (m_controller2.getAButtonPressed()){
       m_elevator1.set(ControlMode.PercentOutput, 100);
       m_elevator2.set(ControlMode.PercentOutput, 100);
-    }
-    else{
+    } else {
       m_elevator1.set(ControlMode.PercentOutput, 0);
       m_elevator2.set(ControlMode.PercentOutput, 0);
     }
-    //Pnumatics
-    if (m_controller2.getYButtonPressed())
+    //Climb Motors
+    if (m_controller2.getLeftTriggerAxis() > 0.5) {
+      m_shoulder.set(ControlMode.PercentOutput, 100);
+    } else {
+      m_shoulder.set(ControlMode.PercentOutput, 0);
+    }
+
+    if (m_controller2.getRightTriggerAxis() > 0.5) {
+      m_winch.set(ControlMode.PercentOutput, 100);
+    } else {
+      m_winch.set(ControlMode.PercentOutput, 0);
+    }
+    //Pneumatics
+    /*if (m_controller2.getYButtonPressed())
     {
       m_solenoid1.set(DoubleSolenoid.Value.kForward);
     }
@@ -237,7 +246,7 @@ public class Robot extends TimedRobot {
     else
     {
       m_solenoid1.set(DoubleSolenoid.Value.kOff);
-    }
+    }*/
 
 
   }
