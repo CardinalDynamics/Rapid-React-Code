@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -18,11 +19,12 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 //import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Compressor;
 //import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
+import edu.wpi.first.wpilibj.PowerDistribution;
 
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -47,11 +49,14 @@ public class Robot extends TimedRobot {
   private Timer auto;
   
   private DifferentialDrive m_myRobot;
+  
+  //REV Stuff and Things
   private CANSparkMax m_frontLeft;
   private CANSparkMax m_frontRight;
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
 
+  //CTRE Stuff and Things
   private VictorSPX m_backShooter;
   private VictorSPX m_frontShooter;
 
@@ -62,6 +67,8 @@ public class Robot extends TimedRobot {
   private TalonSRX m_shoulder;
   private TalonSRX m_winch;
 
+  private PowerDistribution m_pdp;
+
   private MotorControllerGroup m_left;
   private MotorControllerGroup m_right;
 
@@ -69,11 +76,13 @@ public class Robot extends TimedRobot {
   private final XboxController m_controller2 = new XboxController(1);
 
   // Pneumatics
-  //private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
+  private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 0);
   private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
   boolean enabled = compressor.enabled();
   boolean pressureSwitch = compressor.getPressureSwitchValue();
+
+  double voltage;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -95,6 +104,8 @@ public class Robot extends TimedRobot {
     //shooter motors
     m_backShooter = new VictorSPX(6);
     m_frontShooter = new VictorSPX(7);
+    m_backShooter.setInverted(true);
+    m_frontShooter.setInverted(true);
 
     //elevator and cargo slurper motors
     m_elevator1 = new VictorSPX(8);
@@ -114,11 +125,13 @@ public class Robot extends TimedRobot {
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
+    m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
+
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
-    m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
+    m_solenoid1.set(DoubleSolenoid.Value.kForward);
   }
 
   /**
@@ -131,11 +144,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     uptime = Timer.getFPGATimestamp();
+    voltage = m_pdp.getVoltage();
+
     SmartDashboard.putNumber("Uptime", uptime);
     SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putNumber("Total Voltage", voltage);    
   }
 
   /**
@@ -201,13 +217,13 @@ public class Robot extends TimedRobot {
     m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
     
     //intake
-    if (m_controller.getAButtonPressed()) {
+    if (m_controller.getAButton()) {
       m_cargoSlurper.set(ControlMode.PercentOutput, 100);
     } else {
       m_cargoSlurper.set(ControlMode.PercentOutput, 0);
     }
     //launcher
-    if (m_controller2.getXButtonPressed()) {
+    if (m_controller2.getXButton()) {
       m_frontShooter.set(ControlMode.PercentOutput, 100);
       m_backShooter.set(ControlMode.PercentOutput, 100);
     } else {
@@ -215,7 +231,7 @@ public class Robot extends TimedRobot {
       m_backShooter.set(ControlMode.PercentOutput, 0);
     } 
     //elevator/storage
-    if (m_controller2.getAButtonPressed()){
+    if (m_controller2.getAButton()){
       m_elevator1.set(ControlMode.PercentOutput, 100);
       m_elevator2.set(ControlMode.PercentOutput, 100);
     } else {
@@ -235,7 +251,7 @@ public class Robot extends TimedRobot {
       m_winch.set(ControlMode.PercentOutput, 0);
     }
     //Pneumatics
-    /*if (m_controller2.getYButtonPressed())
+    if (m_controller2.getYButtonPressed())
     {
       m_solenoid1.set(DoubleSolenoid.Value.kForward);
     }
@@ -246,7 +262,7 @@ public class Robot extends TimedRobot {
     else
     {
       m_solenoid1.set(DoubleSolenoid.Value.kOff);
-    }*/
+    }
 
 
   }
