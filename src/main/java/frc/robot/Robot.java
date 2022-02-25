@@ -179,31 +179,97 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
       case kCustomAuto:
         // Put custom auto code here
+        auto.start();
+        m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+        m_frontShooter.set(ControlMode.PercentOutput, 100);
+        m_backShooter.set(ControlMode.PercentOutput, 100);
+        m_elevator1.set(ControlMode.PercentOutput, 100);
+        m_elevator2.set(ControlMode.PercentOutput, 100);
 
         break;
       case kDefaultAuto:
       default:
         // Put default auto code here
-        //drive
         auto.start();
-        m_left.set(1.0);
-        m_right.set(-1.0);
-        while(true){
-          if(auto.get()==5){
-            m_left.set(-1.0);
-            m_right.set(1.0);
-          }
-          if(auto.get()==10){
-            m_left.set(1.0);
-            m_right.set(1.0);
-          }
-          if(auto.get()==15){
-            m_left.set(0);
-            m_right.set(0);
-            break;
-          }
+        //test
+        // m_left.set(1.0);
+        // m_right.set(-1.0);
+        // while(true){
+        //   if(auto.get()==5){
+        //     m_left.set(-1.0);
+        //     m_right.set(1.0);
+        //   }
+        //   if(auto.get()==10){
+        //     m_left.set(1.0);
+        //     m_right.set(1.0);
+        //   }
+        //   if(auto.get()==15){
+        //     m_left.set(0);
+        //     m_right.set(0);
+        //     break;
+        //   }
+
+        //test2
+        while(auto.get()<=5){
+          m_left.set(1.0);
+          m_right.set(-1.0);
         }
+        while(auto.get()>5 && auto.get()<=10){
+          m_left.set(-1.0);
+          m_right.set(1.0);
+        }
+        while(auto.get()>10 && auto.get()<15){
+          m_left.set(1.0);
+          m_right.set(1.0);
+        }
+        while(auto.get()==15){
+          m_left.set(0);
+          m_right.set(0);
+        }
+
+        // actual test
+        // while(auto.get()<=3){
+        //   m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+        //   m_frontShooter.set(ControlMode.PercentOutput, 100);
+        //   m_backShooter.set(ControlMode.PercentOutput, 100);
+        //   m_elevator1.set(ControlMode.PercentOutput, 100);
+        //   m_elevator2.set(ControlMode.PercentOutput, 100);
+        // }
+        // m_frontShooter.set(ControlMode.PercentOutput, 0);
+        // m_backShooter.set(ControlMode.PercentOutput, 0);
+        // m_elevator1.set(ControlMode.PercentOutput, 0);
+        // m_elevator2.set(ControlMode.PercentOutput, 0);
+         
+        // while(3<auto.get()&&auto.get()<=3.5){
+        //   m_left.set(1.0);
+        //   m_right.set(1.0);
+        // }
+        // while(3.5<auto.get()&&auto.get()<=5.5){
+        //   m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+        //   m_elevator1.set(ControlMode.PercentOutput, 100);
+        //   m_elevator2.set(ControlMode.PercentOutput, 100);
+        //   m_left.set(1.0);
+        //   m_right.set(-1.0);
+        // } 
+        // while(5.5<auto.get()&&auto.get()<=6){
+        //   m_left.set(1.0);
+        //   m_right.set(1.0);
+        // }
+        // while(6<auto.get() && auto.get() <= 8){
+        //   m_left.set(1.0);
+        //   m_right.set(-1.0);
+        // }
+        // while(auto.get()>8){
+        //   m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+        //   m_frontShooter.set(ControlMode.PercentOutput, 100);
+        //   m_backShooter.set(ControlMode.PercentOutput, 100);
+        //   m_elevator1.set(ControlMode.PercentOutput, 100);
+        //   m_elevator2.set(ControlMode.PercentOutput, 100);
+        // } 
+
+
         break;
+      
     }
   }
 
