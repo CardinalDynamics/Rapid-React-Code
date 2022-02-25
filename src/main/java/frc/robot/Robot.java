@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,7 +24,9 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Compressor;
 //import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 import edu.wpi.first.wpilibj.PowerDistribution;
-//import edu.wpi.first.wpilibj.PneumaticsControlModule;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+
+
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
@@ -49,14 +50,11 @@ public class Robot extends TimedRobot {
   private Timer auto;
   
   private DifferentialDrive m_myRobot;
-  
-  //REV Stuff and Things
   private CANSparkMax m_frontLeft;
   private CANSparkMax m_frontRight;
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
 
-  //CTRE Stuff and Things
   private VictorSPX m_backShooter;
   private VictorSPX m_frontShooter;
 
@@ -67,8 +65,6 @@ public class Robot extends TimedRobot {
   private TalonSRX m_shoulder;
   private TalonSRX m_winch;
 
-  private PowerDistribution m_pdp;
-
   private MotorControllerGroup m_left;
   private MotorControllerGroup m_right;
 
@@ -76,13 +72,21 @@ public class Robot extends TimedRobot {
   private final XboxController m_controller2 = new XboxController(1);
 
   // Pneumatics
-  private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 0);
+  private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
   private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  //private PneumaticsControlModule m_pcm;
+
   boolean enabled = compressor.enabled();
   boolean pressureSwitch = compressor.getPressureSwitchValue();
 
+  double speed;
+  double speed2;
+
+  boolean triggerHappy;
+  boolean isTankDrive;
+
+  private PowerDistribution m_pdp;
   double voltage;
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -125,14 +129,17 @@ public class Robot extends TimedRobot {
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
-    m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
-    //m_pcm = new PneumaticsControlModule(0);
-
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
-    m_solenoid1.set(DoubleSolenoid.Value.kForward);
+    m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
+
+    triggerHappy = false;
+    isTankDrive = true;
+
+    m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
+
   }
 
   /**
@@ -144,15 +151,21 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    uptime = Timer.getFPGATimestamp();
     voltage = m_pdp.getVoltage();
-
+    uptime = Timer.getFPGATimestamp();
     SmartDashboard.putNumber("Uptime", uptime);
     SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putBoolean("Is Tank Drive", isTankDrive);
+    SmartDashboard.putBoolean("Is Trigger Happy?", triggerHappy);
     SmartDashboard.putNumber("Total Voltage", voltage);
+
+
+    if (triggerHappy){
+      SmartDashboard.putNumber("Shooter motor speed percentage", speed2*100);
+    }
   }
 
   /**
@@ -211,16 +224,16 @@ public class Robot extends TimedRobot {
 
         //test2
         while(auto.get()<=5){
-          m_left.set(1.0);
-          m_right.set(-1.0);
+          m_left.set(0.1);
+          m_right.set(-0.1);
         }
         while(auto.get()>5 && auto.get()<=10){
-          m_left.set(-1.0);
-          m_right.set(1.0);
+          m_left.set(-0.1);
+          m_right.set(0.1);
         }
         while(auto.get()>10 && auto.get()<15){
-          m_left.set(1.0);
-          m_right.set(1.0);
+          m_left.set(0.1);
+          m_right.set(0.1);
         }
         while(auto.get()==15){
           m_left.set(0);
@@ -281,56 +294,76 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Drive
-    m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+    if (m_controller.getLeftBumperPressed()){
+      isTankDrive = !isTankDrive;
+    }
+
+    if(isTankDrive){
+      m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+    }
+    else{
+      m_myRobot.arcadeDrive(m_controller.getRightY(), m_controller.getRightX());
+    }
+
     
     //intake
+    
     if (m_controller.getAButton()) {
-      m_cargoSlurper.set(ControlMode.PercentOutput, 100);
-    } else {
+      m_cargoSlurper.set(ControlMode.PercentOutput, 1);
+    }
+    else{
       m_cargoSlurper.set(ControlMode.PercentOutput, 0);
     }
     //launcher
     if (m_controller2.getXButton()) {
-      m_frontShooter.set(ControlMode.PercentOutput, 100);
-      m_backShooter.set(ControlMode.PercentOutput, 100);
-    } else {
+      m_frontShooter.set(ControlMode.PercentOutput, 0.5);
+      m_backShooter.set(ControlMode.PercentOutput, 0.5);
+    }
+    else if (m_controller2.getBButton()){
+      m_frontShooter.set(ControlMode.PercentOutput, 0.25);
+      m_backShooter.set(ControlMode.PercentOutput,  0.25);
+    }
+    else{
       m_frontShooter.set(ControlMode.PercentOutput, 0);
       m_backShooter.set(ControlMode.PercentOutput, 0);
-    } 
-    //elevator/storage
-    if (m_controller2.getAButton()){
-      m_elevator1.set(ControlMode.PercentOutput, 100);
-      m_elevator2.set(ControlMode.PercentOutput, 100);
-    } else {
-      m_elevator1.set(ControlMode.PercentOutput, 0);
-      m_elevator2.set(ControlMode.PercentOutput, 0);
-    }
-    //Climb Motors
-    if (m_controller2.getLeftTriggerAxis() > 0.5) {
-      m_shoulder.set(ControlMode.PercentOutput, 100);
-    } else {
-      m_shoulder.set(ControlMode.PercentOutput, 0);
     }
 
-    if (m_controller2.getRightTriggerAxis() > 0.5) {
-      m_winch.set(ControlMode.PercentOutput, 100);
-    } else {
-      m_winch.set(ControlMode.PercentOutput, 0);
+    speed = m_controller2.getLeftTriggerAxis();
+    m_elevator1.set(ControlMode.PercentOutput, speed);
+    m_elevator2.set(ControlMode.PercentOutput, speed);
+
+    if (m_controller2.getRightBumperPressed()){
+      triggerHappy = !triggerHappy;
     }
-    //Pneumatics
-    if (m_controller2.getYButtonPressed())
+
+    if (triggerHappy){
+      speed2 = m_controller2.getRightTriggerAxis();
+      m_frontShooter.set(ControlMode.PercentOutput, speed2);
+      m_backShooter.set(ControlMode.PercentOutput, speed2);
+    }
+    //elevator/storage
+    /*
+    if (m_controller2.getAButton()){
+      m_elevator1.set(ControlMode.PercentOutput, 1);
+      m_elevator2.set(ControlMode.PercentOutput, 1);
+    }
+    else{
+      m_elevator1.set(ControlMode.PercentOutput, 0);
+      m_elevator2.set(ControlMode.PercentOutput, 0);
+    }*/
+    //Pnumatics
+    /*
+    if (m_controller2.getYButton())
     {
       m_solenoid1.set(DoubleSolenoid.Value.kForward);
     }
-    else if (m_controller2.getYButtonPressed())
+    else
     {
       m_solenoid1.set(DoubleSolenoid.Value.kReverse);
     } 
-    else
-    {
-      m_solenoid1.set(DoubleSolenoid.Value.kOff);
-    }
+    */
 
+    
 
   }
 
