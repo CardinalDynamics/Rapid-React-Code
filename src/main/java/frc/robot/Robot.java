@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Compressor;
 //import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 import edu.wpi.first.wpilibj.PowerDistribution;
-
+//import edu.wpi.first.wpilibj.PneumaticsControlModule;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
@@ -78,7 +78,7 @@ public class Robot extends TimedRobot {
   // Pneumatics
   private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 0);
   private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-
+  //private PneumaticsControlModule m_pcm;
   boolean enabled = compressor.enabled();
   boolean pressureSwitch = compressor.getPressureSwitchValue();
 
@@ -126,6 +126,7 @@ public class Robot extends TimedRobot {
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
     m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
+    //m_pcm = new PneumaticsControlModule(0);
 
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
