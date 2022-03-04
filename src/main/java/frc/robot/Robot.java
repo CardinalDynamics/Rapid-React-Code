@@ -14,26 +14,26 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+//import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
+//import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 //import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Compressor;
+//import edu.wpi.first.wpilibj.PneumaticsModuleType;
+//import edu.wpi.first.wpilibj.Compressor;
 //import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+//import edu.wpi.first.wpilibj.PowerDistribution;
+//import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 
 
 
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+//import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 
 
@@ -65,8 +65,8 @@ public class Robot extends TimedRobot {
   private VictorSPX m_elevator2;
   private VictorSPX m_cargoSlurper;
 
-  private TalonSRX m_shoulder;
-  private TalonSRX m_winch;
+  //private TalonSRX m_shoulder;
+  //private TalonSRX m_winch;
 
   private MotorControllerGroup m_left;
   private MotorControllerGroup m_right;
@@ -75,11 +75,11 @@ public class Robot extends TimedRobot {
   private final XboxController m_controller2 = new XboxController(1);
 
   // Pneumatics
-  private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
-  private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  //private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
+  //private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
-  boolean enabled = compressor.enabled();
-  boolean pressureSwitch = compressor.getPressureSwitchValue();
+  //boolean enabled = compressor.enabled();
+  //boolean pressureSwitch = compressor.getPressureSwitchValue();
 
   double speed;
   double speed2;
@@ -88,8 +88,8 @@ public class Robot extends TimedRobot {
   boolean isTankDrive;
   boolean sucking;
 
-  private PowerDistribution m_pdp;
-  double voltage;
+  //private PowerDistribution m_pdp;
+  //double voltage;
 
   boolean doingYourMom;
 
@@ -134,8 +134,8 @@ public class Robot extends TimedRobot {
     m_cargoSlurper = new VictorSPX(10);
 
     //climb motors
-    m_shoulder = new TalonSRX(11);
-    m_winch = new TalonSRX(12);
+    //m_shoulder = new TalonSRX(11);
+    //m_winch = new TalonSRX(12);
 
     m_frontLeft.restoreFactoryDefaults();
     m_frontRight.restoreFactoryDefaults();
@@ -156,7 +156,7 @@ public class Robot extends TimedRobot {
     isTankDrive = true;
     sucking = false;
 
-    m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
+    //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
     doingYourMom = false;
 
@@ -172,7 +172,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    voltage = m_pdp.getVoltage();
+    //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
     SmartDashboard.putNumber("Uptime", uptime);
     SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
@@ -181,7 +181,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
     SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
-    SmartDashboard.putNumber("Total Voltage", voltage);
+    //SmartDashboard.putNumber("Total Voltage", voltage);
     SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
     SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
     SmartDashboard.putBoolean("Is blue?", isBlue);
