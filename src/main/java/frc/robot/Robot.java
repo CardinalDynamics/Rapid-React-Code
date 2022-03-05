@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
 
   private VictorSPX m_elevator1;
   private VictorSPX m_elevator2;
-  private VictorSPX m_cargoSlurper;
+ // private VictorSPX m_cargoSlurper;
 
   //private TalonSRX m_shoulder;
   //private TalonSRX m_winch;
@@ -87,11 +87,11 @@ public class Robot extends TimedRobot {
   boolean triggerHappy;
   boolean isTankDrive;
   boolean sucking;
+  boolean slow;
 
   //private PowerDistribution m_pdp;
   //double voltage;
 
-  boolean doingYourMom;
 
   String ally; 
   boolean isBlue;
@@ -114,7 +114,7 @@ public class Robot extends TimedRobot {
     auto = new Timer();
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    //SmartDashboard.putData("Auto choices", m_chooser);
 
     //drive motors
     m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
@@ -131,7 +131,7 @@ public class Robot extends TimedRobot {
     //elevator and cargo slurper motors
     m_elevator1 = new VictorSPX(8);
     m_elevator2 = new VictorSPX(9);
-    m_cargoSlurper = new VictorSPX(10);
+    //m_cargoSlurper = new VictorSPX(10);
 
     //climb motors
     //m_shoulder = new TalonSRX(11);
@@ -152,13 +152,13 @@ public class Robot extends TimedRobot {
 
     m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
 
-    triggerHappy = false;
+    triggerHappy = true;
     isTankDrive = true;
     sucking = false;
+    slow = true;
 
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
-    doingYourMom = false;
 
     System.out.println(ally);
   }
@@ -174,21 +174,23 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
+    /*
     SmartDashboard.putNumber("Uptime", uptime);
-    SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    //SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
     SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
     //SmartDashboard.putNumber("Total Voltage", voltage);
     SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
     SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
     SmartDashboard.putBoolean("Is blue?", isBlue);
-
+    
     if (triggerHappy){
       SmartDashboard.putNumber("Shooter motor speed percentage", speed2*100);
     }
+    */
   }
 
   /**
@@ -214,14 +216,15 @@ public class Robot extends TimedRobot {
     
     switch (m_autoSelected) {
       case kCustomAuto:
+      /*
         // Put custom auto code here
         auto.start();
-        m_cargoSlurper.set(ControlMode.PercentOutput, 100);
+        //m_cargoSlurper.set(ControlMode.PercentOutput, 100);
         m_frontShooter.set(ControlMode.PercentOutput, 100);
         m_backShooter.set(ControlMode.PercentOutput, 100);
         m_elevator1.set(ControlMode.PercentOutput, 100);
         m_elevator2.set(ControlMode.PercentOutput, 100);
-
+*/
         break;
       case kDefaultAuto:
       default:
@@ -230,8 +233,8 @@ public class Robot extends TimedRobot {
 
         while(auto.get()<=3){
           // m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-          m_frontShooter.set(ControlMode.PercentOutput, .5);
-          m_backShooter.set(ControlMode.PercentOutput, .5);
+          m_frontShooter.set(ControlMode.PercentOutput, .75);
+          m_backShooter.set(ControlMode.PercentOutput, .75);
           m_elevator1.set(ControlMode.PercentOutput, 1);
           m_elevator2.set(ControlMode.PercentOutput, 1);
         }
@@ -246,7 +249,7 @@ public class Robot extends TimedRobot {
           m_right.set(.5);
         }
         */
-        while(4<auto.get()&&auto.get()<=6){
+        while(4<auto.get()&&auto.get()<=5.25){
           //m_cargoSlurper.set(ControlMode.PercentOutput, 1);
           //m_elevator1.set(ControlMode.PercentOutput, 1);
           //m_elevator2.set(ControlMode.PercentOutput, 1);
@@ -287,41 +290,50 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Drive
-    if (m_controller.getLeftBumperPressed()){
+    if (m_controller.getLeftStickButtonPressed()){
       isTankDrive = !isTankDrive;
     }
-
-    if(isTankDrive){
-      m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+    if(m_controller.getRightStickButtonPressed()){
+      slow = !slow;
     }
+
+    if(slow){
+      if(isTankDrive){
+        m_myRobot.tankDrive(-m_controller.getLeftY()*0.5, m_controller.getRightY()*0.75);
+      }
+      else{
+        m_myRobot.arcadeDrive(m_controller.getRightY()*0.5, m_controller.getRightX()*0.75);
+      }
+    } 
     else{
-      m_myRobot.arcadeDrive(m_controller.getRightY(), m_controller.getRightX());
+      if(isTankDrive){
+        m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+      }
+      else{
+        m_myRobot.arcadeDrive(m_controller.getRightY(), m_controller.getRightX());
+      }
     }
-
     
     //intake
-    
+    /*
     if (m_controller.getAButton()) {
       m_cargoSlurper.set(ControlMode.PercentOutput, 1);
     }
     else{
       m_cargoSlurper.set(ControlMode.PercentOutput, 0);
     }
-
+*/
     if(m_controller2.getLeftBumperPressed()){
       sucking = !sucking;
     }
-
+    
     if(!sucking){
       //launcher
       if (m_controller2.getXButton()) {
-        m_frontShooter.set(ControlMode.PercentOutput, 0.5);
-        m_backShooter.set(ControlMode.PercentOutput, 0.5);
+        m_frontShooter.set(ControlMode.PercentOutput, 0.75);
+        m_backShooter.set(ControlMode.PercentOutput, 0.75);
       }    
-      else if (m_controller2.getBButton()){
-        m_frontShooter.set(ControlMode.PercentOutput, 0.25);
-        m_backShooter.set(ControlMode.PercentOutput,  0.25);
-      }
+     
       else{
         m_frontShooter.set(ControlMode.PercentOutput, 0);
         m_backShooter.set(ControlMode.PercentOutput, 0);
@@ -344,12 +356,12 @@ public class Robot extends TimedRobot {
     else{
       //launcher
       if (m_controller2.getXButton()) {
-        m_frontShooter.set(ControlMode.PercentOutput, -0.25);
-        m_backShooter.set(ControlMode.PercentOutput, -0.25);
+        m_frontShooter.set(ControlMode.PercentOutput, -0.40);
+        m_backShooter.set(ControlMode.PercentOutput, -0.40);
       }
       else if (m_controller2.getBButton()){
-        m_frontShooter.set(ControlMode.PercentOutput, -0.1);
-        m_backShooter.set(ControlMode.PercentOutput,  -0.1);
+        m_frontShooter.set(ControlMode.PercentOutput, -0.2);
+        m_backShooter.set(ControlMode.PercentOutput,  -0.2);
       }
       else{
         m_frontShooter.set(ControlMode.PercentOutput, 0);
@@ -392,10 +404,7 @@ public class Robot extends TimedRobot {
     } 
     */
 
-    if((m_controller.getStartButtonPressed() || m_controller2.getStartButtonPressed())&&sucking){
-      doingYourMom = true;
-    }
-
+   
   }
 
   /** This function is called once when the robot is disabled. */
@@ -404,7 +413,7 @@ public class Robot extends TimedRobot {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     m_controller.setRumble(RumbleType.kLeftRumble, 0.0);
     m_controller.setRumble(RumbleType.kRightRumble, 0.0);
-    doingYourMom = false;
+    
   }  
 
   /** This function is called periodically when disabled. */
