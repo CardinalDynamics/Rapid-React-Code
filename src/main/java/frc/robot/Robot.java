@@ -57,12 +57,13 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_frontRight;
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
-
+/*
   private VictorSPX m_backShooter;
   private VictorSPX m_frontShooter;
 
   private VictorSPX m_elevator1;
   private VictorSPX m_elevator2;
+  */
  // private VictorSPX m_cargoSlurper;
 
   //private TalonSRX m_shoulder;
@@ -72,7 +73,7 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_right;
 
   private final XboxController m_controller = new XboxController(0);
-  private final XboxController m_controller2 = new XboxController(1);
+  //private final XboxController m_controller2 = new XboxController(1);
 
   // Pneumatics
   //private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
@@ -84,9 +85,9 @@ public class Robot extends TimedRobot {
   double speed;
   double speed2;
 
-  boolean triggerHappy;
+  //boolean triggerHappy;
   boolean isTankDrive;
-  boolean sucking;
+  //boolean sucking;
   boolean slow;
 
   //private PowerDistribution m_pdp;
@@ -123,6 +124,7 @@ public class Robot extends TimedRobot {
     m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
     
     //shooter motors
+    /*
     m_backShooter = new VictorSPX(6);
     m_frontShooter = new VictorSPX(7);
     m_backShooter.setInverted(true);
@@ -136,7 +138,7 @@ public class Robot extends TimedRobot {
     //climb motors
     //m_shoulder = new TalonSRX(11);
     //m_winch = new TalonSRX(12);
-
+*/
     m_frontLeft.restoreFactoryDefaults();
     m_frontRight.restoreFactoryDefaults();
     m_rearLeft.restoreFactoryDefaults();
@@ -151,12 +153,14 @@ public class Robot extends TimedRobot {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
     m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
-
+/*
     triggerHappy = true;
-    isTankDrive = true;
+    
     sucking = false;
-    slow = true;
-
+    
+*/
+  slow = false;
+  isTankDrive = true;
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
 
@@ -233,16 +237,16 @@ public class Robot extends TimedRobot {
 
         while(auto.get()<=3){
           // m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-          m_frontShooter.set(ControlMode.PercentOutput, .75);
-          m_backShooter.set(ControlMode.PercentOutput, .75);
-          m_elevator1.set(ControlMode.PercentOutput, 1);
-          m_elevator2.set(ControlMode.PercentOutput, 1);
+          // m_frontShooter.set(ControlMode.PercentOutput, .85);
+          // m_backShooter.set(ControlMode.PercentOutput, .85);
+          // m_elevator1.set(ControlMode.PercentOutput, 1);
+          // m_elevator2.set(ControlMode.PercentOutput, 1);
         }
 
-        m_frontShooter.set(ControlMode.PercentOutput, 0);
-        m_backShooter.set(ControlMode.PercentOutput, 0);
-        m_elevator1.set(ControlMode.PercentOutput, 0);
-        m_elevator2.set(ControlMode.PercentOutput, 0);
+        // m_frontShooter.set(ControlMode.PercentOutput, 0);
+        // m_backShooter.set(ControlMode.PercentOutput, 0);
+        // m_elevator1.set(ControlMode.PercentOutput, 0);
+        // m_elevator2.set(ControlMode.PercentOutput, 0);
         /* 
         while(3<auto.get()&&auto.get()<=4){
           m_left.set(.5);
@@ -298,22 +302,15 @@ public class Robot extends TimedRobot {
     }
 
     if(slow){
-      if(isTankDrive){
-        m_myRobot.tankDrive(-m_controller.getLeftY()*0.5, m_controller.getRightY()*0.75);
-      }
-      else{
-        m_myRobot.arcadeDrive(m_controller.getRightY()*0.5, m_controller.getRightX()*0.75);
-      }
+      m_myRobot.tankDrive(-m_controller.getLeftY()*0.5, m_controller.getRightY()*0.75);
+      
     } 
     else{
-      if(isTankDrive){
-        m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
-      }
-      else{
-        m_myRobot.arcadeDrive(m_controller.getRightY(), m_controller.getRightX());
-      }
+
+      m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
+
     }
-    
+  
     //intake
     /*
     if (m_controller.getAButton()) {
@@ -322,7 +319,7 @@ public class Robot extends TimedRobot {
     else{
       m_cargoSlurper.set(ControlMode.PercentOutput, 0);
     }
-*/
+
     if(m_controller2.getLeftBumperPressed()){
       sucking = !sucking;
     }
