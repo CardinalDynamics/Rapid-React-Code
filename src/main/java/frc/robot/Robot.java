@@ -11,6 +11,7 @@ import com.revrobotics.SparkMaxRelativeEncoder;
 //import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 //import edu.wpi.first.wpilibj.GenericHID;
 //import edu.wpi.first.wpilibj.PowerDistribution;
 //import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+// import edu.wpi.first.wpilibj.DifferentialDriveOdometry;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -71,7 +73,9 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_climber;
   
   private final XboxController m_controller = new XboxController(0);
-  //private final XboxController m_controller2 = new XboxController(1);
+  private final XboxController m_controller2 = new XboxController(1);
+
+
 
 
   double speed;
