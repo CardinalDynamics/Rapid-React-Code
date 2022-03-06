@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.XboxController;
 //import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
+import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -30,8 +32,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+//import com.ctre.phoenix.motorcontrol.ControlMode;
+//import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 //import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 
@@ -56,17 +58,18 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_frontRight;
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
-/*
-  private VictorSPX m_backShooter;
-  private VictorSPX m_frontShooter;
 
-  private VictorSPX m_elevator1;
-  private VictorSPX m_elevator2;
-  */
- // private VictorSPX m_cargoSlurper;
+  //motors for shooter
+  private PWMVictorSPX m_backShooter;
+  private PWMVictorSPX m_frontShooter;
 
-  //private TalonSRX m_shoulder;
-  //private TalonSRX m_winch;
+  //motors for elevator and intake
+  private PWMVictorSPX m_elevator;
+  private PWMVictorSPX m_intake;
+  
+  //climb motors, MotorControllerGroup m_climber
+  private PWMTalonSRX m_climb1;
+  private PWMTalonSRX m_climb2;
 
   private MotorControllerGroup m_left;
   //m_left needs to be positive to go forward
@@ -74,6 +77,8 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_right;
   //m_right needs to be negative to go forward
 
+  private MotorControllerGroup m_climber;
+  
   private final XboxController m_controller = new XboxController(0);
   //private final XboxController m_controller2 = new XboxController(1);
 
@@ -126,6 +131,8 @@ public class Robot extends TimedRobot {
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
+    m_climber = new MotorControllerGroup(m_climb1, m_climb2);
+
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
@@ -156,19 +163,19 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
-    /*
-    SmartDashboard.putNumber("Uptime", uptime);
-    //SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    //SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    //SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    //SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
-    SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
-    //SmartDashboard.putNumber("Total Voltage", voltage);
-    SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
-    SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
-    SmartDashboard.putBoolean("Is blue?", isBlue);
     
+    SmartDashboard.putNumber("Uptime", uptime);
+    SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
+    //SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
+    //SmartDashboard.putNumber("Total Voltage", voltage);
+    //SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
+    //SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
+    SmartDashboard.putBoolean("Is blue?", isBlue);
+    /*
     if (triggerHappy){
       SmartDashboard.putNumber("Shooter motor speed percentage", speed2*100);
     }
