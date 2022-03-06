@@ -22,9 +22,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 //import edu.wpi.first.wpilibj.GenericHID;
-//import edu.wpi.first.wpilibj.PneumaticsModuleType;
-//import edu.wpi.first.wpilibj.Compressor;
-//import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 //import edu.wpi.first.wpilibj.PowerDistribution;
 //import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 
@@ -70,28 +67,23 @@ public class Robot extends TimedRobot {
   //private TalonSRX m_winch;
 
   private MotorControllerGroup m_left;
+  //m_left needs to be positive to go forward
+
   private MotorControllerGroup m_right;
+  //m_right needs to be negative to go forward
 
   private final XboxController m_controller = new XboxController(0);
   //private final XboxController m_controller2 = new XboxController(1);
 
-  // Pneumatics
-  //private final DoubleSolenoid m_solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
-  //private final Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-
-  //boolean enabled = compressor.enabled();
-  //boolean pressureSwitch = compressor.getPressureSwitchValue();
 
   double speed;
   double speed2;
 
-  //boolean triggerHappy;
   boolean isTankDrive;
-  //boolean sucking;
   boolean slow;
 
   //private PowerDistribution m_pdp;
-  //double voltage;
+  double voltage;
 
 
   String ally; 
@@ -123,22 +115,6 @@ public class Robot extends TimedRobot {
     m_rearLeft = new CANSparkMax(3, MotorType.kBrushless);
     m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
     
-    //shooter motors
-    /*
-    m_backShooter = new VictorSPX(6);
-    m_frontShooter = new VictorSPX(7);
-    m_backShooter.setInverted(true);
-    m_frontShooter.setInverted(true);
-
-    //elevator and cargo slurper motors
-    m_elevator1 = new VictorSPX(8);
-    m_elevator2 = new VictorSPX(9);
-    //m_cargoSlurper = new VictorSPX(10);
-
-    //climb motors
-    //m_shoulder = new TalonSRX(11);
-    //m_winch = new TalonSRX(12);
-*/
     m_frontLeft.restoreFactoryDefaults();
     m_frontRight.restoreFactoryDefaults();
     m_rearLeft.restoreFactoryDefaults();
@@ -220,67 +196,35 @@ public class Robot extends TimedRobot {
     
     switch (m_autoSelected) {
       case kCustomAuto:
-      /*
+      
         // Put custom auto code here
         auto.start();
-        //m_cargoSlurper.set(ControlMode.PercentOutput, 100);
-        m_frontShooter.set(ControlMode.PercentOutput, 100);
-        m_backShooter.set(ControlMode.PercentOutput, 100);
-        m_elevator1.set(ControlMode.PercentOutput, 100);
-        m_elevator2.set(ControlMode.PercentOutput, 100);
-*/
+        auto.stop();
         break;
       case kDefaultAuto:
       default:
         // Put default auto code here
+
         auto.start();
 
-        while(auto.get()<=3){
-          // m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-          // m_frontShooter.set(ControlMode.PercentOutput, .85);
-          // m_backShooter.set(ControlMode.PercentOutput, .85);
-          // m_elevator1.set(ControlMode.PercentOutput, 1);
-          // m_elevator2.set(ControlMode.PercentOutput, 1);
+        while(auto.get()<0.2){
+          m_left.set(0.25);
+          m_right.set(-0.25);
         }
 
-        // m_frontShooter.set(ControlMode.PercentOutput, 0);
-        // m_backShooter.set(ControlMode.PercentOutput, 0);
-        // m_elevator1.set(ControlMode.PercentOutput, 0);
-        // m_elevator2.set(ControlMode.PercentOutput, 0);
-        /* 
-        while(3<auto.get()&&auto.get()<=4){
-          m_left.set(.5);
-          m_right.set(.5);
-        }
-        */
-        while(4<auto.get()&&auto.get()<=5.25){
-          //m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-          //m_elevator1.set(ControlMode.PercentOutput, 1);
-          //m_elevator2.set(ControlMode.PercentOutput, 1);
+        while(auto.get()>=0.2 && auto.get()<1.2){
           m_left.set(-0.5);
           m_right.set(0.5);
-        } 
+        }
 
-        /**
-        while(6<auto.get()&&auto.get()<=7){
+        while(auto.get()>=1.2 && auto.get()<15){
           m_left.set(0.5);
           m_right.set(0.5);
         }
-        while(6<auto.get() && auto.get() <= 8){
-          m_left.set(1.0);
-          m_right.set(-1.0);
-        }
-        while(auto.get()>8){
-          //m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-          m_frontShooter.set(ControlMode.PercentOutput, 0.5);
-          m_backShooter.set(ControlMode.PercentOutput, 0.5);
-          m_elevator1.set(ControlMode.PercentOutput, 1);
-          m_elevator2.set(ControlMode.PercentOutput, 1);
-        } 
-        */
+
         m_left.set(0);
         m_right.set(0);
-
+        auto.stop();
         break;
       
     }
@@ -310,96 +254,6 @@ public class Robot extends TimedRobot {
       m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
 
     }
-  
-    //intake
-    /*
-    if (m_controller.getAButton()) {
-      m_cargoSlurper.set(ControlMode.PercentOutput, 1);
-    }
-    else{
-      m_cargoSlurper.set(ControlMode.PercentOutput, 0);
-    }
-
-    if(m_controller2.getLeftBumperPressed()){
-      sucking = !sucking;
-    }
-    
-    if(!sucking){
-      //launcher
-      if (m_controller2.getXButton()) {
-        m_frontShooter.set(ControlMode.PercentOutput, 0.75);
-        m_backShooter.set(ControlMode.PercentOutput, 0.75);
-      }    
-     
-      else{
-        m_frontShooter.set(ControlMode.PercentOutput, 0);
-        m_backShooter.set(ControlMode.PercentOutput, 0);
-      }
-
-      speed = m_controller2.getLeftTriggerAxis();
-      m_elevator1.set(ControlMode.PercentOutput, speed);
-      m_elevator2.set(ControlMode.PercentOutput, speed);
-
-      if (m_controller2.getRightBumperPressed()){
-        triggerHappy = !triggerHappy;
-      }
-
-      if (triggerHappy){
-        speed2 = m_controller2.getRightTriggerAxis();
-        m_frontShooter.set(ControlMode.PercentOutput, speed2);
-        m_backShooter.set(ControlMode.PercentOutput, speed2);
-      }
-    }
-    else{
-      //launcher
-      if (m_controller2.getXButton()) {
-        m_frontShooter.set(ControlMode.PercentOutput, -0.40);
-        m_backShooter.set(ControlMode.PercentOutput, -0.40);
-      }
-      else if (m_controller2.getBButton()){
-        m_frontShooter.set(ControlMode.PercentOutput, -0.2);
-        m_backShooter.set(ControlMode.PercentOutput,  -0.2);
-      }
-      else{
-        m_frontShooter.set(ControlMode.PercentOutput, 0);
-        m_backShooter.set(ControlMode.PercentOutput, 0);
-      }
-
-      speed = m_controller2.getLeftTriggerAxis();
-      m_elevator1.set(ControlMode.PercentOutput, -speed*0.5);
-      m_elevator2.set(ControlMode.PercentOutput, -speed*0.5);
-
-      if (m_controller2.getRightBumperPressed()){
-        triggerHappy = !triggerHappy;
-      }
-
-      if (triggerHappy){
-        speed2 = m_controller2.getRightTriggerAxis();
-        m_frontShooter.set(ControlMode.PercentOutput, -speed2*0.5);
-        m_backShooter.set(ControlMode.PercentOutput, -speed2*0.5);
-      }
-    }
-    //elevator/storage
-    /*
-    if (m_controller2.getAButton()){
-      m_elevator1.set(ControlMode.PercentOutput, 1);
-      m_elevator2.set(ControlMode.PercentOutput, 1);
-    }
-    else{
-      m_elevator1.set(ControlMode.PercentOutput, 0);
-      m_elevator2.set(ControlMode.PercentOutput, 0);
-    }*/
-    //Pnumatics
-    /*
-    if (m_controller2.getYButton())
-    {
-      m_solenoid1.set(DoubleSolenoid.Value.kForward);
-    }
-    else
-    {
-      m_solenoid1.set(DoubleSolenoid.Value.kReverse);
-    } 
-    */
 
    
   }
