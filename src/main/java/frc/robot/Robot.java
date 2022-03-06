@@ -11,6 +11,8 @@ import com.revrobotics.SparkMaxRelativeEncoder;
 //import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -29,7 +31,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 //import edu.wpi.first.wpilibj.GenericHID;
 //import edu.wpi.first.wpilibj.PowerDistribution;
 //import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-// import edu.wpi.first.wpilibj.DifferentialDriveOdometry;
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -61,8 +65,7 @@ public class Robot extends TimedRobot {
   private PWMVictorSPX m_intake;
   
   //climb motors, MotorControllerGroup m_climber
-  private PWMTalonSRX m_climb1;
-  private PWMTalonSRX m_climb2;
+  private PWMTalonSRX m_climb;
 
   private MotorControllerGroup m_left;
   //m_left needs to be positive to go forward
@@ -70,12 +73,13 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_right;
   //m_right needs to be negative to go forward
 
-  private MotorControllerGroup m_climber;
   
   private final XboxController m_controller = new XboxController(0);
   private final XboxController m_controller2 = new XboxController(1);
 
+  private DifferentialDriveOdometry m_odometry;
 
+  AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
 
   double speed;
@@ -99,6 +103,13 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     ally = DriverStation.getAlliance().toString();
 
+    m_gyro.getYaw();
+
+
+
+
+    m_odometry = new DifferentialDriveOdometry(new Rotation2d(), new Pose2d(0, 0, new Rotation2d()));
+    
     if(ally.equals("Blue")){
       isBlue = true;
     }
@@ -125,8 +136,6 @@ public class Robot extends TimedRobot {
     m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_myRobot = new DifferentialDrive(m_left, m_right);
-
-    m_climber = new MotorControllerGroup(m_climb1, m_climb2);
 
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
