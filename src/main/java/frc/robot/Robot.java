@@ -222,8 +222,8 @@ public class Robot extends TimedRobot {
 
     launchSpeed = stuffRightTrigger;
 
-    m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters)
-    m_myRobot.updateOdometry();
+    // m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters);
+    // m_myRobot.updateOdometry();
 
 
     RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
@@ -231,7 +231,7 @@ public class Robot extends TimedRobot {
     RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
-    frontLeftEncoder.
+
 
     /*
     if (triggerHappy){
