@@ -6,18 +6,24 @@
 
 package frc.robot;
 
-import java.lang.Math;
-
+//import edu.wpi.first.wpilibj.GenericHID;
+//import edu.wpi.first.wpilibj.PowerDistribution;
+//import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxRelativeEncoder;
 //import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxRelativeEncoder;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+//import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,16 +31,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
-import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DriverStation;
-//import edu.wpi.first.wpilibj.GenericHID;
-//import edu.wpi.first.wpilibj.PowerDistribution;
-//import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.SPI;
+
 
 
 /**
@@ -59,15 +58,16 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rearRight;
 
   //motors for shooter
-  private PWMVictorSPX m_backShooter;
-  private PWMVictorSPX m_frontShooter;
+  private PWMVictorSPX m_backMoonLauncher;
+  private PWMVictorSPX m_frontMoonLauncher;
+  private MotorControllerGroup m_moonLauncher;
 
   //motors for elevator and intake
   private PWMVictorSPX m_elevator;
   private PWMVictorSPX m_intake;
   
   //climb motors, MotorControllerGroup m_climber
-  private PWMTalonSRX m_climb;
+  private PWMVictorSPX m_climb;
 
   private MotorControllerGroup m_left;
   //m_left needs to be positive to go forward
@@ -82,7 +82,11 @@ public class Robot extends TimedRobot {
   private DifferentialDriveOdometry m_odometry;
 
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
+
+  SlewRateLimiter BallAndChain = new SlewRateLimiter(0.1);
+
   double yaw;
+  Rotation2d rotation;
 
   double speed;
   double speed2;
@@ -108,8 +112,9 @@ public class Robot extends TimedRobot {
     ally = DriverStation.getAlliance().toString();
 
     yaw = Math.toRadians(m_gyro.getYaw());
+    rotation = new Rotation2d(yaw);
 
-    m_odometry = new DifferentialDriveOdometry(new Rotation2d(yaw), new Pose2d(0, 0, new Rotation2d()));
+    m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
     if(ally.equals("Blue")){
       isBlue = true;
@@ -136,7 +141,17 @@ public class Robot extends TimedRobot {
 
     m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
+    m_right.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
+
+    m_frontMoonLauncher = new PWMVictorSPX(0);
+    m_backMoonLauncher = new PWMVictorSPX(1);
+    m_frontMoonLauncher.setInverted(true);
+    m_moonLauncher = new MotorControllerGroup(m_frontMoonLauncher, m_backMoonLauncher);
+
+    m_intake = new PWMVictorSPX(2);
+    m_elevator = new PWMVictorSPX(3);
+    m_climb = new PWMVictorSPX(4);
 
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
@@ -149,8 +164,8 @@ public class Robot extends TimedRobot {
     sucking = false;
     
 */
-  slow = false;
-  isTankDrive = true;
+   slow = false;
+   isTankDrive = true;
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
 
@@ -169,6 +184,8 @@ public class Robot extends TimedRobot {
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
 
+    yaw = Math.toRadians(m_gyro.getYaw());
+    // rotation = new Rotation2d(yaw);
      
     SmartDashboard.putNumber("Uptime", uptime);
     SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
@@ -224,12 +241,12 @@ public class Robot extends TimedRobot {
 
         while(auto.get()<0.2){
           m_left.set(0.25);
-          m_right.set(-0.25);
+          m_right.set(0.25);
         }
 
         while(auto.get()>=0.2 && auto.get()<1.2){
           m_left.set(-0.5);
-          m_right.set(0.5);
+          m_right.set(-0.5);
         }
 
         while(auto.get()>=1.2 && auto.get()<15){
@@ -253,6 +270,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Drive
+
     if (m_controller.getLeftStickButtonPressed()){
       isTankDrive = !isTankDrive;
     }
@@ -260,14 +278,18 @@ public class Robot extends TimedRobot {
       slow = !slow;
     }
 
-    if(slow){
-      m_myRobot.tankDrive(-m_controller.getLeftY()*0.5, m_controller.getRightY()*0.75);
-      
-    } 
-    else{
-
-      m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
-
+    if (slow) {
+      if (isTankDrive) {
+        m_myRobot.tankDrive(BallAndChain.calculate(m_controller.getLeftY())*0.75, BallAndChain.calculate(m_controller.getRightY())*0.75);
+      } else {
+        m_myRobot.arcadeDrive(BallAndChain.calculate(m_controller.getLeftY())*0.75, BallAndChain.calculate(m_controller.getLeftX()*0.75));
+      }
+    } else {
+      if (isTankDrive) {
+        m_myRobot.tankDrive(BallAndChain.calculate(m_controller.getLeftY()), BallAndChain.calculate(m_controller.getRightY()));
+      } else {
+        m_myRobot.arcadeDrive(BallAndChain.calculate(m_controller.getLeftY()), BallAndChain.calculate(m_controller.getLeftX()));
+      }
     }
 
    
