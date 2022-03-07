@@ -6,6 +6,8 @@
 
 package frc.robot;
 
+import java.lang.Math;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxRelativeEncoder;
 //import com.revrobotics.RelativeEncoder;
@@ -80,7 +82,7 @@ public class Robot extends TimedRobot {
   private DifferentialDriveOdometry m_odometry;
 
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
-
+  double yaw;
 
   double speed;
   double speed2;
@@ -105,10 +107,9 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     ally = DriverStation.getAlliance().toString();
 
-    m_gyro.getYaw();
-n
+    yaw = Math.toRadians(m_gyro.getYaw());
 
-    m_odometry = new DifferentialDriveOdometry(new Rotation2d(), new Pose2d(0, 0, new Rotation2d()));
+    m_odometry = new DifferentialDriveOdometry(new Rotation2d(yaw), new Pose2d(0, 0, new Rotation2d()));
     
     if(ally.equals("Blue")){
       isBlue = true;
