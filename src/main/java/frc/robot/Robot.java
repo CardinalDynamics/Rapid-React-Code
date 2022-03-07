@@ -299,7 +299,7 @@ public class Robot extends TimedRobot {
       triggerHappy = !triggerHappy;
     }
     if(c_driveController.getLeftStickButtonPressed()){
-      triggerSucking = 
+      triggerSucking = !triggerSucking;
     }
 
     if (slow) {
