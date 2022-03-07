@@ -76,8 +76,8 @@ public class Robot extends TimedRobot {
   //m_right needs to be negative to go forward
 
   
-  private final XboxController m_controller = new XboxController(0);
-  private final XboxController m_controller2 = new XboxController(1);
+  private final XboxController c_driveController = new XboxController(0);
+  private final XboxController c_stuffController = new XboxController(1);
 
   private DifferentialDriveOdometry m_odometry;
 
@@ -97,9 +97,19 @@ public class Robot extends TimedRobot {
   //private PowerDistribution m_pdp;
   double voltage;
 
-
   String ally; 
   boolean isBlue;
+  
+  double driveLeftTrigger;
+  double driveRightTrigger;
+
+  double stuffLeftTrigger;
+  double stuffRightTrigger;
+
+  double launchSpeed;
+  boolean triggerHappy;
+
+  boolean triggerSucking;
 
 
 
@@ -158,14 +168,13 @@ public class Robot extends TimedRobot {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
     m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
-/*
+
     triggerHappy = true;
-    
-    sucking = false;
-    
-*/
-   slow = false;
-   isTankDrive = true;
+       
+    slow = false;
+    isTankDrive = true;
+    triggerSucking = false;
+
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
 
@@ -198,6 +207,15 @@ public class Robot extends TimedRobot {
     //SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
     //SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
     SmartDashboard.putBoolean("Is blue?", isBlue);
+
+    driveLeftTrigger = c_driveController.getLeftTriggerAxis();
+    driveRightTrigger = c_driveController.getRightTriggerAxis();
+    
+    stuffLeftTrigger = c_stuffController.getLeftTriggerAxis();
+    stuffRightTrigger = c_stuffController.getRightTriggerAxis();
+
+    launchSpeed = stuffRightTrigger;
+
     /*
     if (triggerHappy){
       SmartDashboard.putNumber("Shooter motor speed percentage", speed2*100);
@@ -271,25 +289,50 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //Drive
 
-    if (m_controller.getLeftStickButtonPressed()){
+    if (c_driveController.getLeftStickButtonPressed()){
       isTankDrive = !isTankDrive;
     }
-    if(m_controller.getRightStickButtonPressed()){
+    if(c_driveController.getRightStickButtonPressed()){
       slow = !slow;
+    }
+    if(c_stuffController.getRightBumperPressed()){
+      triggerHappy = !triggerHappy;
+    }
+    if(c_driveController.getLeftStickButtonPressed()){
+      triggerSucking = 
     }
 
     if (slow) {
       if (isTankDrive) {
-        m_myRobot.tankDrive(BallAndChain.calculate(m_controller.getLeftY())*0.75, BallAndChain.calculate(m_controller.getRightY())*0.75);
+        m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getRightY())*0.75);
       } else {
-        m_myRobot.arcadeDrive(BallAndChain.calculate(m_controller.getLeftY())*0.75, BallAndChain.calculate(m_controller.getLeftX()*0.75));
+        m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getLeftX()*0.75));
       }
     } else {
       if (isTankDrive) {
-        m_myRobot.tankDrive(BallAndChain.calculate(m_controller.getLeftY()), BallAndChain.calculate(m_controller.getRightY()));
+        m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
       } else {
-        m_myRobot.arcadeDrive(BallAndChain.calculate(m_controller.getLeftY()), BallAndChain.calculate(m_controller.getLeftX()));
+        m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getLeftX()));
       }
+    }
+
+    
+    if (triggerHappy){
+      m_moonLauncher.set(launchSpeed);
+    } else if(c_stuffController.getAButton()) {
+      m_moonLauncher.set(1);
+    } else {
+      m_moonLauncher.set(0);
+    }
+
+    if(triggerSucking){
+      m_elevator.set(driveRightTrigger);
+    }
+    else if(c_stuffController.getAButton()){
+      m_elevator.set(1);
+    }
+    else{
+      m_elevator.set(0);
     }
 
    
@@ -299,8 +342,8 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
-    m_controller.setRumble(RumbleType.kLeftRumble, 0.0);
-    m_controller.setRumble(RumbleType.kRightRumble, 0.0);
+    c_driveController.setRumble(RumbleType.kLeftRumble, 0.0);
+    c_driveController.setRumble(RumbleType.kRightRumble, 0.0);
     
   }  
 
@@ -316,6 +359,6 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     //m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
-    m_myRobot.arcadeDrive(m_controller.getLeftX(), -m_controller.getLeftY());
+    m_myRobot.arcadeDrive(c_driveController.getLeftX(), -c_driveController.getLeftY());
   }
 }
