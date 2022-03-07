@@ -11,6 +11,7 @@ package frc.robot;
 //import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
 //import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxRelativeEncoder;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 //import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -226,8 +228,10 @@ public class Robot extends TimedRobot {
     m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters)
     m_myRobot.updatOdometry();
 
-    Encoder frontLeftEncoder = m_frontLeft.getEncoder(encoderType, countsPerRev)
-    Object rearLeftEncoder = m_rearLeft.getEncoder();
+    Object kjh = m_frontRight.getEncoder
+
+    Encoder frontLeftEncoder = m_frontLeft.getEncoder(m_frontLeft.getEncoder(), 10);
+    Object rearLeftEncoder = m_rearLeft.getEncoder(EncoderType.kNoSensor, 10);
     Object frontRightEncoder = m_frontRight.getEncoder();
     Object rearRightEncoder = m_rearRight.getEncoder();
 
