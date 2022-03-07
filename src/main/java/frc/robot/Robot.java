@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.RelativeEncoder;
 
 
 
@@ -226,16 +227,15 @@ public class Robot extends TimedRobot {
     launchSpeed = stuffRightTrigger;
 
     m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters)
-    m_myRobot.updatOdometry();
+    m_myRobot.updateOdometry();
 
-    Object kjh = m_frontRight.getEncoder
 
     RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    Object rearLeftEncoder = m_rearLeft.getEncoder(EncoderType.kNoSensor, 10);
-    Object frontRightEncoder = m_frontRight.getEncoder();
-    Object rearRightEncoder = m_rearRight.getEncoder();
-
-    m_frontLeftEncoder.
+    RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    
+    frontLeftEncoder.
 
     /*
     if (triggerHappy){
