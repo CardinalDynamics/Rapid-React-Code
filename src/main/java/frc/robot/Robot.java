@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 //import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -124,8 +125,13 @@ public class Robot extends TimedRobot {
     yaw = Math.toRadians(m_gyro.getYaw());
     rotation = new Rotation2d(yaw);
 
-    m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
+    m_odometry = new DifferentialDriveOdometry(rotation);
+    //m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
+
+
+
+
     if(ally.equals("Blue")){
       isBlue = true;
     }
@@ -190,6 +196,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    System.out.println(ally);
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
 
@@ -215,6 +222,16 @@ public class Robot extends TimedRobot {
     stuffRightTrigger = c_stuffController.getRightTriggerAxis();
 
     launchSpeed = stuffRightTrigger;
+
+    m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters)
+    m_myRobot.updatOdometry();
+
+    Encoder frontLeftEncoder = m_frontLeft.getEncoder(encoderType, countsPerRev)
+    Object rearLeftEncoder = m_rearLeft.getEncoder();
+    Object frontRightEncoder = m_frontRight.getEncoder();
+    Object rearRightEncoder = m_rearRight.getEncoder();
+
+    m_frontLeftEncoder.
 
     /*
     if (triggerHappy){
@@ -298,7 +315,7 @@ public class Robot extends TimedRobot {
     if(c_stuffController.getRightBumperPressed()){
       triggerHappy = !triggerHappy;
     }
-    if(c_driveController.getLeftStickButtonPressed()){
+    if(c_driveController.getRightStickButtonPressed()){
       triggerSucking = !triggerSucking;
     }
 
@@ -325,14 +342,20 @@ public class Robot extends TimedRobot {
       m_moonLauncher.set(0);
     }
 
+    if (c_stuffController.getBButton()){
+      m_elevator.set(1);
+    } else {
+      m_elevator.set(0);
+    }
+
     if(triggerSucking){
-      m_elevator.set(driveRightTrigger);
+      m_intake.set(driveRightTrigger);
     }
     else if(c_stuffController.getAButton()){
-      m_elevator.set(1);
+      m_intake.set(1);
     }
     else{
-      m_elevator.set(0);
+      m_intake.set(0);
     }
 
    
