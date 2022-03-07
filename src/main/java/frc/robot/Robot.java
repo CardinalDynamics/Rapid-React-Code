@@ -230,7 +230,7 @@ public class Robot extends TimedRobot {
 
     Object kjh = m_frontRight.getEncoder
 
-    Encoder frontLeftEncoder = m_frontLeft.getEncoder(m_frontLeft.getEncoder(), 10);
+    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     Object rearLeftEncoder = m_rearLeft.getEncoder(EncoderType.kNoSensor, 10);
     Object frontRightEncoder = m_frontRight.getEncoder();
     Object rearRightEncoder = m_rearRight.getEncoder();
