@@ -95,6 +95,8 @@ public class Robot extends TimedRobot {
   String ally; 
   boolean isBlue;
 
+
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -104,9 +106,7 @@ public class Robot extends TimedRobot {
     ally = DriverStation.getAlliance().toString();
 
     m_gyro.getYaw();
-
-
-
+n
 
     m_odometry = new DifferentialDriveOdometry(new Rotation2d(), new Pose2d(0, 0, new Rotation2d()));
     
@@ -167,7 +167,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
-    
+
+     
     SmartDashboard.putNumber("Uptime", uptime);
     SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
