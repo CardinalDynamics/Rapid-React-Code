@@ -247,7 +247,7 @@ public class Robot extends TimedRobot {
     // rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
     rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
     
-    m_odometry.update(rotation, leftDistanceTurned, rightDistanceTurned);
+    m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
 
 
     /*
