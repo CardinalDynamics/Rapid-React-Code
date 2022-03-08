@@ -361,8 +361,10 @@ public class Robot extends TimedRobot {
 
     if (c_stuffController.getBButton()){
       m_elevator.set(1);
+      m_intake.set(1);
     } else {
       m_elevator.set(0);
+      m_intake.set(0);
     }
 
     if(triggerSucking){
