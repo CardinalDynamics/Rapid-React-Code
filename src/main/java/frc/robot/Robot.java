@@ -4,12 +4,12 @@
 
 package frc.robot;
 
-//import edu.wpi.first.wpilibj.GenericHID;
-//import edu.wpi.first.wpilibj.PowerDistribution;
-//import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+// import edu.wpi.first.wpilibj.GenericHID;
+// import edu.wpi.first.wpilibj.PowerDistribution;
+// import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
-//import com.revrobotics.RelativeEncoder;
+// import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
@@ -18,19 +18,19 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-//import edu.wpi.first.wpilibj.DoubleSolenoid;
+// import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-//import edu.wpi.first.wpilibj.DriverStation.Alliance;
+// import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -82,40 +82,45 @@ public class Robot extends TimedRobot {
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
   SlewRateLimiter BallAndChain = new SlewRateLimiter(0.1);
-
-  double yaw;
+  
   Rotation2d rotation;
 
+  double yaw;
   double speed;
   double speed2;
-
-  boolean isTankDrive;
-  boolean slow;
-
-  //private PowerDistribution m_pdp;
   double voltage;
-
-  String ally; 
-  boolean isBlue;
-  
   double driveLeftTrigger;
   double driveRightTrigger;
-
   double stuffLeftTrigger;
   double stuffRightTrigger;
-
   double launchSpeed;
-  boolean triggerHappy;
-
-  boolean triggerSucking;
-
-  double wheelCircumference = 6*Math.PI;
-
   double leftDistanceTurned;
   double rightDistanceTurned;
 
+  double wheelCircumference = 6*Math.PI;
   double leftPreviousPos=0;
   double rightPreviousPos=0;
+
+  boolean isTankDrive;
+  boolean slow;
+  boolean hasLimiter;
+  boolean isBlue;
+  boolean triggerHappy;
+  boolean triggerSucking;
+
+  String ally; 
+
+  //private PowerDistribution m_pdp;
+
+  
+
+  
+  
+  
+
+
+
+
 
 
 
@@ -134,9 +139,9 @@ public class Robot extends TimedRobot {
     //m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
     RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
 
 
     frontLeftEncoder.setPosition(0);
@@ -172,11 +177,13 @@ public class Robot extends TimedRobot {
     m_right.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
+    //Launcher
     m_frontMoonLauncher = new PWMVictorSPX(0);
     m_backMoonLauncher = new PWMVictorSPX(1);
     m_frontMoonLauncher.setInverted(true);
     m_moonLauncher = new MotorControllerGroup(m_frontMoonLauncher, m_backMoonLauncher);
 
+    //Stuff
     m_intake = new PWMVictorSPX(2);
     m_elevator = new PWMVictorSPX(4);
     m_climb = new PWMVictorSPX(3);
@@ -187,16 +194,20 @@ public class Robot extends TimedRobot {
 
     m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
 
-    triggerHappy = true;
-       
+    //Booleans
+    triggerHappy = true;   
     slow = false;
     isTankDrive = true;
     triggerSucking = false;
-
+    hasLimiter = true;
+    
+    
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
 
-    System.out.println(ally);
+
+    
+
   }
 
   /**
@@ -215,18 +226,19 @@ public class Robot extends TimedRobot {
     yaw = Math.toRadians(m_gyro.getYaw());
     // rotation = new Rotation2d(yaw);
      
-    SmartDashboard.putNumber("Uptime", uptime);
-    SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
-    //SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
-    //SmartDashboard.putNumber("Total Voltage", voltage);
-    //SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
-    //SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
-    SmartDashboard.putBoolean("Is blue?", isBlue);
+    // SmartDashboard.putNumber("Uptime", uptime);
+    // SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    // SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    // SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    // SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
+    // SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
+    // SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
+    // SmartDashboard.putNumber("Total Voltage", voltage);
+    // SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
+    // SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
+    // SmartDashboard.putBoolean("Is blue?", isBlue);
 
+    //Trigger values
     driveLeftTrigger = c_driveController.getLeftTriggerAxis();
     driveRightTrigger = c_driveController.getRightTriggerAxis();
     
@@ -237,10 +249,11 @@ public class Robot extends TimedRobot {
     
     
 
+    //Odometry mess
     RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
     //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
     leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
@@ -250,11 +263,7 @@ public class Robot extends TimedRobot {
     m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
 
 
-    /*
-    if (triggerHappy){
-      SmartDashboard.putNumber("Shooter motor speed percentage", speed2*100);
-    }
-    */
+
   }
 
   /**
@@ -284,6 +293,7 @@ public class Robot extends TimedRobot {
         // Put custom auto code here
         auto.start();
         auto.stop();
+        auto.reset();
         break;
       case kDefaultAuto:
       default:
@@ -291,24 +301,25 @@ public class Robot extends TimedRobot {
 
         auto.start();
 
-        while(auto.get()<0.2){
-          m_left.set(0.25);
-          m_right.set(0.25);
+        while(auto.get()>=2){
+          m_moonLauncher.set(1);
         }
 
-        while(auto.get()>=0.2 && auto.get()<1.2){
+        while(auto.get()>=2 && auto.get()<3){
           m_left.set(-0.5);
           m_right.set(-0.5);
         }
 
-        while(auto.get()>=1.2 && auto.get()<15){
+        while(auto.get()>=3 && auto.get()<14.9){
           m_left.set(0.5);
-          m_right.set(0.5);
+          m_right.set(-0.5);
         }
 
         m_left.set(0);
         m_right.set(0);
+        m_moonLauncher.set(0);
         auto.stop();
+        auto.reset();
         break;
       
     }
@@ -322,7 +333,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //Drive
-
+    //boolean switchers
     if (c_driveController.getLeftStickButtonPressed()){
       isTankDrive = !isTankDrive;
     }
@@ -333,24 +344,41 @@ public class Robot extends TimedRobot {
       triggerHappy = !triggerHappy;
     }
     if(c_driveController.getRightStickButtonPressed()){
-      triggerSucking = !triggerSucking;
+      hasLimiter = !hasLimiter;
     }
 
-    if (slow) {
-      if (isTankDrive) {
-        m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getRightY())*0.75);
+    // Drive options
+    if(hasLimiter){
+      if (slow) {
+        if (isTankDrive) {
+          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getRightY())*0.75);
+        } else {
+          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getLeftX()*0.75));
+        }
       } else {
-        m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getLeftX()*0.75));
+        if (isTankDrive) {
+          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
+        } else {
+          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getLeftX()));
+        }
       }
     } else {
-      if (isTankDrive) {
-        m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
+      if (slow) {
+        if (isTankDrive) {
+          m_myRobot.tankDrive(c_driveController.getLeftY()*0.75, c_driveController.getRightY()*0.75);
+        } else {
+          m_myRobot.arcadeDrive(c_driveController.getLeftY()*0.75, c_driveController.getLeftX()*0.75);
+        }
       } else {
-        m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getLeftX()));
+        if (isTankDrive) {
+          m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
+        } else {
+          m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
+        }
       }
     }
-
     
+    //launcher
     if (triggerHappy){
       m_moonLauncher.set(launchSpeed);
     } else if(c_stuffController.getAButton()) {
@@ -359,21 +387,12 @@ public class Robot extends TimedRobot {
       m_moonLauncher.set(0);
     }
 
+    // Elevator/Intake
     if (c_stuffController.getBButton()){
       m_elevator.set(1);
       m_intake.set(1);
     } else {
       m_elevator.set(0);
-      m_intake.set(0);
-    }
-
-    if(triggerSucking){
-      m_intake.set(driveRightTrigger);
-    }
-    else if(c_stuffController.getAButton()){
-      m_intake.set(1);
-    }
-    else{
       m_intake.set(0);
     }
 
