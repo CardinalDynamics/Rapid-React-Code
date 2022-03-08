@@ -111,6 +111,14 @@ public class Robot extends TimedRobot {
 
   boolean triggerSucking;
 
+  double wheelCircumference = 6*Math.PI;
+
+  double leftDistanceTurned;
+  double rightDistanceTurned;
+
+  double leftPreviousPos=0;
+  double rightPreviousPos=0;
+
 
 
   /**
@@ -127,7 +135,14 @@ public class Robot extends TimedRobot {
     m_odometry = new DifferentialDriveOdometry(rotation);
     //m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
+    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
 
+
+    frontLeftEncoder.setPosition(0);
+    frontRightEncoder.setPosition(0);
 
 
 
@@ -221,16 +236,20 @@ public class Robot extends TimedRobot {
     stuffRightTrigger = c_stuffController.getRightTriggerAxis();
 
     launchSpeed = stuffRightTrigger;
-
-    // m_odometry.update(rotation, leftDistanceMeters, rightDistanceMeters);
-    // m_myRobot.updateOdometry();
-
+    
+    
 
     RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
+    leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
+    leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
+    rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
+    rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
+    
+    m_odometry.update(rotation, leftDistanceTurned, rightDistanceTurned);
 
 
     /*
