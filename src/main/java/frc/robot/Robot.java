@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
   private PWMVictorSPX m_elevator;
   private PWMVictorSPX m_intake;
   
-  //climb motors, MotorControllerGroup m_climber
+  //climb motor
   private PWMVictorSPX m_climb;
 
   private MotorControllerGroup m_left;
@@ -226,7 +226,7 @@ public class Robot extends TimedRobot {
     yaw = Math.toRadians(m_gyro.getYaw());
     // rotation = new Rotation2d(yaw);
      
-    // SmartDashboard.putNumber("Uptime", uptime);
+    SmartDashboard.putNumber("Uptime", uptime);
     // SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     // SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
     // SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
@@ -382,7 +382,7 @@ public class Robot extends TimedRobot {
     if (triggerHappy){
       m_moonLauncher.set(launchSpeed);
     } else if(c_stuffController.getAButton()) {
-      m_moonLauncher.set(1);
+      m_moonLauncher.set(0.5);
     } else {
       m_moonLauncher.set(0);
     }
