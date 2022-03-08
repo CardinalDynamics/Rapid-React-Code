@@ -2,8 +2,6 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-//yeet
-
 package frc.robot;
 
 //import edu.wpi.first.wpilibj.GenericHID;
@@ -244,9 +242,9 @@ public class Robot extends TimedRobot {
     RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
-    leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
+    //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
     leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
-    rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
+    // rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
     rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
     
     m_odometry.update(rotation, leftDistanceTurned, rightDistanceTurned);
