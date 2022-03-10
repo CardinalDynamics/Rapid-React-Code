@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
 
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
-  SlewRateLimiter BallAndChain = new SlewRateLimiter(0.1);
+  SlewRateLimiter BallAndChain = new SlewRateLimiter(0.25);
   
   Rotation2d rotation;
 
@@ -103,11 +103,11 @@ public class Robot extends TimedRobot {
   double rightPreviousPos=0;
 
   boolean isTankDrive;
-  boolean slow;
+  boolean backwards;
   boolean hasLimiter;
   boolean isBlue;
   boolean triggerHappy;
-  boolean triggerSucking;
+  boolean sucking;
 
   String ally; 
 
@@ -166,7 +166,7 @@ public class Robot extends TimedRobot {
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_right.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
-
+ 
     //Launcher
     m_frontMoonLauncher = new PWMVictorSPX(0);
     m_backMoonLauncher = new PWMVictorSPX(1);
@@ -186,10 +186,10 @@ public class Robot extends TimedRobot {
 
     //Booleans
     triggerHappy = true;   
-    slow = false;
+    backwards = false;
     isTankDrive = true;
-    triggerSucking = false;
-    hasLimiter = true;
+    hasLimiter = false;
+    sucking = false;
     
     
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
@@ -334,36 +334,40 @@ public class Robot extends TimedRobot {
       isTankDrive = !isTankDrive;
     }
     if(c_driveController.getRightStickButtonPressed()){
-      slow = !slow;
+      backwards = !backwards;
     }
-    if(c_stuffController.getRightBumperPressed()){
-      triggerHappy = !triggerHappy;
-    }
-    if(c_driveController.getRightStickButtonPressed()){
+    if(c_driveController.getLeftStickButtonPressed()){
       hasLimiter = !hasLimiter;
     }
+    if(c_stuffController.getLeftBumperPressed()){
+      triggerHappy = !triggerHappy;
+    }
+    if(c_stuffController.getRightBumperPressed()){
+      sucking = !sucking;
+    }
+
 
     // Drive options
     if(hasLimiter){
-      if (slow) {
+      if (backwards) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getRightY())*0.75);
+          m_myRobot.tankDrive(BallAndChain.calculate(-c_driveController.getLeftY()), BallAndChain.calculate(-c_driveController.getRightY()));
         } else {
-          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getLeftX()*0.75));
+          m_myRobot.arcadeDrive(BallAndChain.calculate(-c_driveController.getLeftY()), BallAndChain.calculate(-c_driveController.getLeftX()));
         }
       } else {
         if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
+          m_myRobot.tankDrive(BallAndChain.calculate(-c_driveController.getLeftY()), BallAndChain.calculate(-c_driveController.getRightY()));
         } else {
-          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getLeftX()));
+          m_myRobot.arcadeDrive(BallAndChain.calculate(-c_driveController.getLeftY()), BallAndChain.calculate(-c_driveController.getLeftX()));
         }
       }
     } else {
-      if (slow) {
+      if (backwards) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(c_driveController.getLeftY()*0.75, c_driveController.getRightY()*0.75);
+          m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
         } else {
-          m_myRobot.arcadeDrive(c_driveController.getLeftY()*0.75, c_driveController.getLeftX()*0.75);
+          m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
         }
       } else {
         if (isTankDrive) {
@@ -384,12 +388,22 @@ public class Robot extends TimedRobot {
     }
 
     // Elevator/Intake
-    if (c_stuffController.getBButton()){
-      m_elevator.set(1);
-      m_intake.set(1);
-    } else {
-      m_elevator.set(0);
-      m_intake.set(0);
+    if(sucking){
+      if (c_stuffController.getBButton()){
+        m_elevator.set(-1);
+        m_intake.set(-1);
+      } else {
+        m_elevator.set(0);
+        m_intake.set(0);
+      }
+    } else{
+      if (c_stuffController.getBButton()){
+        m_elevator.set(1);
+        m_intake.set(1);
+      } else {
+        m_elevator.set(0);
+        m_intake.set(0);
+      }
     }
 
    
