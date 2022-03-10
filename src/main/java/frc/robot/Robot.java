@@ -383,13 +383,13 @@ public class Robot extends TimedRobot {
     if (triggerHappy){
       m_moonLauncher.set(launchSpeed);
     } else if(c_stuffController.getAButton()) {
-      m_moonLauncher.set(0.5);
+      m_moonLauncher.set(0.75);
     } else {
       m_moonLauncher.set(0);
     }
 
     // Elevator/Intake
-    if (c_stuffController.getBButton()){
+    if (c_driveController.getBButton()){
       m_elevator.set(1);
       m_intake.set(1);
     } else {
