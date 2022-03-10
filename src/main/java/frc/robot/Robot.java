@@ -138,14 +138,14 @@ public class Robot extends TimedRobot {
     m_odometry = new DifferentialDriveOdometry(rotation);
     //m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
-    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
 
 
-    frontLeftEncoder.setPosition(0);
-    frontRightEncoder.setPosition(0);
+    // frontLeftEncoder.setPosition(0);
+    // frontRightEncoder.setPosition(0);
 
 
 
@@ -174,13 +174,13 @@ public class Robot extends TimedRobot {
 
     m_left = new MotorControllerGroup(m_frontLeft, m_rearLeft);
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
-    m_right.setInverted(true);
+    m_left.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
     //Launcher
     m_frontMoonLauncher = new PWMVictorSPX(0);
     m_backMoonLauncher = new PWMVictorSPX(1);
-    m_frontMoonLauncher.setInverted(true);
+    m_backMoonLauncher.setInverted(true);
     m_moonLauncher = new MotorControllerGroup(m_frontMoonLauncher, m_backMoonLauncher);
 
     //Stuff
@@ -201,6 +201,7 @@ public class Robot extends TimedRobot {
     triggerSucking = false;
     hasLimiter = true;
     
+    System.out.println(ally);
     
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
@@ -219,7 +220,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    System.out.println(ally);
+    
     //voltage = m_pdp.getVoltage();
     uptime = Timer.getFPGATimestamp();
 
@@ -351,15 +352,15 @@ public class Robot extends TimedRobot {
     if(hasLimiter){
       if (slow) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getRightY())*0.75);
+          m_myRobot.tankDrive(c_driveController.getLeftY()*0.75, c_driveController.getRightY()*0.75);
         } else {
-          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY())*0.75, BallAndChain.calculate(c_driveController.getLeftX()*0.75));
+          m_myRobot.arcadeDrive(c_driveController.getLeftY()*0.75, c_driveController.getLeftX()*0.75);
         }
       } else {
         if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
+          m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
         } else {
-          m_myRobot.arcadeDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getLeftX()));
+          m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
         }
       }
     } else {
