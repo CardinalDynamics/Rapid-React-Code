@@ -389,13 +389,17 @@ public class Robot extends TimedRobot {
     }
 
     // Elevator/Intake
-    if (c_driveController.getBButton()){
+    if (c_stuffController.getBButton()){
       m_elevator.set(1);
       m_intake.set(1);
     } else {
       m_elevator.set(0);
       m_intake.set(0);
     }
+
+    // Climber
+    m_climb.set(c_stuffController.getLeftY());
+    
 
    
   }
