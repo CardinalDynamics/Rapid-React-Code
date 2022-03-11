@@ -105,7 +105,7 @@ public class Robot extends TimedRobot {
   double rightPreviousPos=0;
 
   boolean isTankDrive;
-  boolean slow;
+  boolean backwards;
   boolean hasLimiter;
   boolean isBlue;
   boolean triggerHappy;
@@ -204,10 +204,10 @@ public class Robot extends TimedRobot {
 
     //Booleans
     triggerHappy = true;   
-    slow = false;
+    backwards = false;
     isTankDrive = true;
     triggerSucking = false;
-    hasLimiter = true;
+    hasLimiter = false;
     
     System.out.println(ally);
     
@@ -308,7 +308,8 @@ public class Robot extends TimedRobot {
         auto.start();
 
         while(auto.get()<=3){
-          m_moonLauncher.set(1);
+          m_moonLauncher.set(0.5);
+          m_elevator.set(1);
         }
 
         while(auto.get()>=4 && auto.get()<5){
@@ -316,7 +317,7 @@ public class Robot extends TimedRobot {
           m_right.set(-0.5);
         }
 
-
+        m_elevator.set(0);
         m_left.set(0);
         m_right.set(0);
         m_moonLauncher.set(0);
@@ -339,8 +340,8 @@ public class Robot extends TimedRobot {
     if (c_driveController.getLeftStickButtonPressed()){
       isTankDrive = !isTankDrive;
     }
-    if(c_driveController.getRightStickButtonPressed()){
-      slow = !slow;
+    if(c_driveController.getRightBumperPressed()){
+      backwards = !backwards;
     }
     if(c_stuffController.getRightBumperPressed()){
       triggerHappy = !triggerHappy;
@@ -351,11 +352,11 @@ public class Robot extends TimedRobot {
 
     // Drive options
     if(hasLimiter){
-      if (slow) {
+      if (backwards) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(c_driveController.getLeftY()*0.75, c_driveController.getRightY()*0.75);
+          m_myRobot.tankDrive(-c_driveController.getRightY(), -c_driveController.getLeftY());
         } else {
-          m_myRobot.arcadeDrive(c_driveController.getLeftY()*0.75, c_driveController.getLeftX()*0.75);
+          m_myRobot.arcadeDrive(-c_driveController.getLeftY(), -c_driveController.getLeftX());
         }
       } else {
         if (isTankDrive) {
@@ -365,11 +366,11 @@ public class Robot extends TimedRobot {
         }
       }
     } else {
-      if (slow) {
+      if (backwards) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(c_driveController.getLeftY()*0.75, c_driveController.getRightY()*0.75);
+          m_myRobot.tankDrive(-c_driveController.getRightY(), -c_driveController.getLeftY());
         } else {
-          m_myRobot.arcadeDrive(c_driveController.getLeftY()*0.75, c_driveController.getLeftX()*0.75);
+          m_myRobot.arcadeDrive(-c_driveController.getLeftY()*0.75, -c_driveController.getLeftX()*0.75);
         }
       } else {
         if (isTankDrive) {
