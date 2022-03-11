@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+
+// import java.nio.file.Paths;
+
 // import edu.wpi.first.wpilibj.GenericHID;
 // import edu.wpi.first.wpilibj.PowerDistribution;
 // import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -112,11 +115,16 @@ public class Robot extends TimedRobot {
 
   //private PowerDistribution m_pdp;
 
-  
+  //Odometry mess
+    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    
 
   
   
-  
+
 
 
 
@@ -206,7 +214,6 @@ public class Robot extends TimedRobot {
     //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
 
-
     
 
   }
@@ -250,11 +257,6 @@ public class Robot extends TimedRobot {
     
     
 
-    //Odometry mess
-    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
     //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
     leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
@@ -293,6 +295,9 @@ public class Robot extends TimedRobot {
       
         // Put custom auto code here
         auto.start();
+
+        
+
         auto.stop();
         auto.reset();
         break;
@@ -302,19 +307,15 @@ public class Robot extends TimedRobot {
 
         auto.start();
 
-        while(auto.get()>=2){
+        while(auto.get()<=3){
           m_moonLauncher.set(1);
         }
 
-        while(auto.get()>=2 && auto.get()<3){
+        while(auto.get()>=4 && auto.get()<5){
           m_left.set(-0.5);
           m_right.set(-0.5);
         }
 
-        while(auto.get()>=3 && auto.get()<14.9){
-          m_left.set(0.5);
-          m_right.set(-0.5);
-        }
 
         m_left.set(0);
         m_right.set(0);
@@ -381,7 +382,7 @@ public class Robot extends TimedRobot {
     
     //launcher
     if (triggerHappy){
-      m_moonLauncher.set(launchSpeed);
+      m_moonLauncher.set(launchSpeed*0.5);
     } else if(c_stuffController.getAButton()) {
       m_moonLauncher.set(0.75);
     } else {
