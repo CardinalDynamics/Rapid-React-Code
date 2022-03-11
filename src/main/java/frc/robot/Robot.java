@@ -14,12 +14,12 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 // import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
+// import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+// import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 // import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -80,11 +80,11 @@ public class Robot extends TimedRobot {
   private final XboxController c_driveController = new XboxController(0);
   private final XboxController c_stuffController = new XboxController(1);
 
-  private DifferentialDriveOdometry m_odometry;
+  //private DifferentialDriveOdometry m_odometry;
 
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
-  SlewRateLimiter BallAndChain = new SlewRateLimiter(0.1);
+  SlewRateLimiter BallAndChain = new SlewRateLimiter(2);
   
   Rotation2d rotation;
 
@@ -116,9 +116,9 @@ public class Robot extends TimedRobot {
   //private PowerDistribution m_pdp;
 
   //Odometry mess
-    RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+   // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+ //   RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     
 
@@ -143,7 +143,7 @@ public class Robot extends TimedRobot {
     yaw = Math.toRadians(m_gyro.getYaw());
     rotation = new Rotation2d(yaw);
 
-    m_odometry = new DifferentialDriveOdometry(rotation);
+    //m_odometry = new DifferentialDriveOdometry(rotation);
     //m_odometry = new DifferentialDriveOdometry(rotation, new Pose2d(0, 0, new Rotation2d()));
     
     // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
@@ -188,7 +188,7 @@ public class Robot extends TimedRobot {
     //Launcher
     m_frontMoonLauncher = new PWMVictorSPX(0);
     m_backMoonLauncher = new PWMVictorSPX(1);
-    m_backMoonLauncher.setInverted(true);
+    m_frontMoonLauncher.setInverted(true);
     m_moonLauncher = new MotorControllerGroup(m_frontMoonLauncher, m_backMoonLauncher);
 
     //Stuff
@@ -207,7 +207,7 @@ public class Robot extends TimedRobot {
     backwards = false;
     isTankDrive = true;
     triggerSucking = false;
-    hasLimiter = false;
+    hasLimiter = true;
     
     System.out.println(ally);
     
@@ -259,11 +259,11 @@ public class Robot extends TimedRobot {
 
     
     //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
-    leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
+   // leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
     // rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
-    rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
+   // rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
     
-    m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
+  //  m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
 
 
 
@@ -299,7 +299,6 @@ public class Robot extends TimedRobot {
         
 
         auto.stop();
-        auto.reset();
         break;
       case kDefaultAuto:
       default:
@@ -312,17 +311,17 @@ public class Robot extends TimedRobot {
           m_elevator.set(1);
         }
 
-        while(auto.get()>=4 && auto.get()<5){
-          m_left.set(-0.5);
-          m_right.set(-0.5);
+        while(auto.get()>3 && auto.get()<6){
+          m_left.set(0.25);
+          m_right.set(0.25);
         }
 
         m_elevator.set(0);
         m_left.set(0);
         m_right.set(0);
         m_moonLauncher.set(0);
+
         auto.stop();
-        auto.reset();
         break;
       
     }
@@ -354,13 +353,13 @@ public class Robot extends TimedRobot {
     if(hasLimiter){
       if (backwards) {
         if (isTankDrive) {
-          m_myRobot.tankDrive(-c_driveController.getRightY(), -c_driveController.getLeftY());
+          m_myRobot.tankDrive(BallAndChain.calculate(-c_driveController.getRightY()), BallAndChain.calculate(-c_driveController.getLeftY()));
         } else {
           m_myRobot.arcadeDrive(-c_driveController.getLeftY(), -c_driveController.getLeftX());
         }
       } else {
         if (isTankDrive) {
-          m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
+          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
         } else {
           m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
         }
@@ -383,7 +382,7 @@ public class Robot extends TimedRobot {
     
     //launcher
     if (triggerHappy){
-      m_moonLauncher.set(launchSpeed*0.5);
+      m_moonLauncher.set(c_stuffController.getRightTriggerAxis()*0.5);
     } else if(c_stuffController.getAButton()) {
       m_moonLauncher.set(0.75);
     } else {
@@ -401,7 +400,7 @@ public class Robot extends TimedRobot {
 
     // Climber
     m_climb.set(c_stuffController.getLeftY());
-    
+
 
    
   }
