@@ -4,37 +4,26 @@
 
 package frc.robot;
 
-
-// import java.nio.file.Paths;
-
-// import edu.wpi.first.wpilibj.GenericHID;
-// import edu.wpi.first.wpilibj.PowerDistribution;
-// import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
-// import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-// import com.revrobotics.RelativeEncoder;
-// import com.revrobotics.SparkMaxRelativeEncoder;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-// import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-// import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-// import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 
 
 /**
@@ -58,7 +47,6 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
 
- 
   //motors for elevator and intake
   private PWMVictorSPX m_elevator;
   private PWMVictorSPX m_intake;
@@ -72,9 +60,13 @@ public class Robot extends TimedRobot {
   private MotorControllerGroup m_right;
   //m_right needs to be negative to go forward
 
-  
   private final XboxController c_driveController = new XboxController(0);
   private final XboxController c_stuffController = new XboxController(1);
+
+  double driveLeftTrigger;
+  double driveRightTrigger;
+  double stuffLeftTrigger;
+  double stuffRightTrigger;
 
   //private DifferentialDriveOdometry m_odometry;
 
@@ -83,7 +75,6 @@ public class Robot extends TimedRobot {
   SlewRateLimiter BallAndChain = new SlewRateLimiter(1);
   SlewRateLimiter BallAndChain2 = new SlewRateLimiter(1);
 
-  
   Rotation2d rotation;
 
   double yaw;
@@ -100,7 +91,10 @@ public class Robot extends TimedRobot {
 
   String ally; 
 
-  //private PowerDistribution m_pdp;
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tx = table.getEntry("tx");
+  NetworkTableEntry ty = table.getEntry("ty");
+  NetworkTableEntry ta = table.getEntry("ta");
 
   //Odometry mess
    // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
@@ -210,21 +204,21 @@ public class Robot extends TimedRobot {
     // rotation = new Rotation2d(yaw);
      
     SmartDashboard.putNumber("Uptime", uptime);
-    // SmartDashboard.putNumber("Front Left Motor RPM", m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    // SmartDashboard.putNumber("Front Right Motor RPM", m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    // SmartDashboard.putNumber("Rear Left Motor RPM", m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    // SmartDashboard.putNumber("Rear Right Motor RPM", m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity());
-    // SmartDashboard.putBoolean("Is Tank Drive (LJ)", isTankDrive);
-    // SmartDashboard.putBoolean("Is Trigger Happy? (RB)", triggerHappy);
-    // SmartDashboard.putNumber("Total Voltage", voltage);
-    // SmartDashboard.putBoolean("Is sucking? (LB)", sucking);
-    // SmartDashboard.putBoolean("Is doing your mom?", doingYourMom);
-    // SmartDashboard.putBoolean("Is blue?", isBlue);
 
     //Trigger values
+    driveLeftTrigger = c_driveController.getLeftTriggerAxis();
+    driveRightTrigger = c_driveController.getRightTriggerAxis();
+    stuffLeftTrigger = c_stuffController.getLeftTriggerAxis();
+    stuffRightTrigger = c_stuffController.getRightTriggerAxis();
     
-    
-    
+    //limelight updates
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
+
+    SmartDashboard.putNumber("LimelightX", x);
+    SmartDashboard.putNumber("LimelightY", y);
+    SmartDashboard.putNumber("LimelightArea", area);
 
     
     //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
