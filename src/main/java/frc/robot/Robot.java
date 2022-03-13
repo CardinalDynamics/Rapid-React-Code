@@ -76,7 +76,7 @@ public class Robot extends TimedRobot {
   Rotation2d rotation;
 
   double yaw;
-  double speed2;
+  double speed;
   double voltage;
 
   double wheelCircumference = 6*Math.PI;
