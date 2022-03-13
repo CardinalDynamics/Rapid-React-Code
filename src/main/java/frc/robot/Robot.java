@@ -345,7 +345,7 @@ public class Robot extends TimedRobot {
     }
 
     // Climber
-    m_climb.set(-c_stuffController.getLeftY());
+    m_climb.set(c_stuffController.getLeftY());
   }
 
   /** This function is called once when the robot is disabled. */
