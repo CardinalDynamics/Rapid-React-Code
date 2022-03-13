@@ -15,7 +15,7 @@ import com.revrobotics.CANSparkMax;
 // import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 // import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxRelativeEncoder;
+// import com.revrobotics.SparkMaxRelativeEncoder;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -46,7 +46,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
   private double uptime;
   private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
+  private static final String kCustomAuto = "MyAuto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -58,11 +58,7 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rearLeft;
   private CANSparkMax m_rearRight;
 
-  //motors for shooter
-  private PWMVictorSPX m_backMoonLauncher;
-  private PWMVictorSPX m_frontMoonLauncher;
-  private MotorControllerGroup m_moonLauncher;
-
+ 
   //motors for elevator and intake
   private PWMVictorSPX m_elevator;
   private PWMVictorSPX m_intake;
@@ -84,32 +80,23 @@ public class Robot extends TimedRobot {
 
   AHRS m_gyro = new AHRS(SPI.Port.kMXP);
 
-  SlewRateLimiter BallAndChain = new SlewRateLimiter(2);
+  SlewRateLimiter BallAndChain = new SlewRateLimiter(1);
+  SlewRateLimiter BallAndChain2 = new SlewRateLimiter(1);
+
   
   Rotation2d rotation;
 
   double yaw;
-  double speed;
   double speed2;
   double voltage;
-  double driveLeftTrigger;
-  double driveRightTrigger;
-  double stuffLeftTrigger;
-  double stuffRightTrigger;
-  double launchSpeed;
-  double leftDistanceTurned;
-  double rightDistanceTurned;
 
   double wheelCircumference = 6*Math.PI;
   double leftPreviousPos=0;
   double rightPreviousPos=0;
 
-  boolean isTankDrive;
   boolean backwards;
   boolean hasLimiter;
-  boolean isBlue;
-  boolean triggerHappy;
-  boolean triggerSucking;
+  boolean spitting;
 
   String ally; 
 
@@ -157,12 +144,7 @@ public class Robot extends TimedRobot {
 
 
 
-    if(ally.equals("Blue")){
-      isBlue = true;
-    }
-    else{
-      isBlue = false;
-    }
+    
 
     auto = new Timer();
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
@@ -185,12 +167,7 @@ public class Robot extends TimedRobot {
     m_left.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
 
-    //Launcher
-    m_frontMoonLauncher = new PWMVictorSPX(0);
-    m_backMoonLauncher = new PWMVictorSPX(1);
-    m_frontMoonLauncher.setInverted(true);
-    m_moonLauncher = new MotorControllerGroup(m_frontMoonLauncher, m_backMoonLauncher);
-
+    
     //Stuff
     m_intake = new PWMVictorSPX(2);
     m_elevator = new PWMVictorSPX(4);
@@ -200,14 +177,12 @@ public class Robot extends TimedRobot {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("stream").setNumber(0);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
-    m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
+    // m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42).getVelocity();
 
-    //Booleans
-    triggerHappy = true;   
+    //Booleans  
     backwards = false;
-    isTankDrive = true;
-    triggerSucking = false;
-    hasLimiter = true;
+    hasLimiter = false;
+    spitting = false;
     
     System.out.println(ally);
     
@@ -247,13 +222,7 @@ public class Robot extends TimedRobot {
     // SmartDashboard.putBoolean("Is blue?", isBlue);
 
     //Trigger values
-    driveLeftTrigger = c_driveController.getLeftTriggerAxis();
-    driveRightTrigger = c_driveController.getRightTriggerAxis();
     
-    stuffLeftTrigger = c_stuffController.getLeftTriggerAxis();
-    stuffRightTrigger = c_stuffController.getRightTriggerAxis();
-
-    launchSpeed = stuffRightTrigger;
     
     
 
@@ -302,25 +271,23 @@ public class Robot extends TimedRobot {
         break;
       case kDefaultAuto:
       default:
-        // Put default auto code here
+              // Put default auto code here
 
         auto.start();
 
-        while(auto.get()<=3){
-          m_moonLauncher.set(0.5);
-          m_elevator.set(1);
-        }
-
-        while(auto.get()>3 && auto.get()<6){
+        while(auto.get()<2.5){
           m_left.set(0.25);
           m_right.set(0.25);
         }
-
-        m_elevator.set(0);
         m_left.set(0);
         m_right.set(0);
-        m_moonLauncher.set(0);
-
+        while(auto.get()>=2.5 && auto.get()<6){
+          m_elevator.set(-75);
+          m_intake.set(-1);
+        }
+        
+        m_elevator.set(0);
+        m_intake.set(0);
         auto.stop();
         break;
       
@@ -336,73 +303,49 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //Drive
     //boolean switchers
-    if (c_driveController.getLeftStickButtonPressed()){
-      isTankDrive = !isTankDrive;
-    }
+   
     if(c_driveController.getRightBumperPressed()){
       backwards = !backwards;
     }
-    if(c_stuffController.getRightBumperPressed()){
-      triggerHappy = !triggerHappy;
-    }
-    if(c_driveController.getRightStickButtonPressed()){
+    if(c_driveController.getLeftStickButtonPressed()){
       hasLimiter = !hasLimiter;
+    }
+    if(c_stuffController.getRightBumperPressed()){
+      spitting = !spitting;
     }
 
     // Drive options
     if(hasLimiter){
       if (backwards) {
-        if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(-c_driveController.getRightY()), BallAndChain.calculate(-c_driveController.getLeftY()));
-        } else {
-          m_myRobot.arcadeDrive(-c_driveController.getLeftY(), -c_driveController.getLeftX());
-        }
+        m_myRobot.tankDrive(-BallAndChain.calculate(c_driveController.getRightY()), -BallAndChain2.calculate(c_driveController.getLeftY()));
       } else {
-        if (isTankDrive) {
-          m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain.calculate(c_driveController.getRightY()));
-        } else {
-          m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
-        }
+        m_myRobot.tankDrive(BallAndChain.calculate(c_driveController.getLeftY()), BallAndChain2.calculate(c_driveController.getRightY()));
       }
     } else {
       if (backwards) {
-        if (isTankDrive) {
-          m_myRobot.tankDrive(-c_driveController.getRightY(), -c_driveController.getLeftY());
-        } else {
-          m_myRobot.arcadeDrive(-c_driveController.getLeftY()*0.75, -c_driveController.getLeftX()*0.75);
-        }
+        m_myRobot.tankDrive(-c_driveController.getRightY(), -c_driveController.getLeftY());
       } else {
-        if (isTankDrive) {
-          m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
-        } else {
-          m_myRobot.arcadeDrive(c_driveController.getLeftY(), c_driveController.getLeftX());
-        }
+        m_myRobot.tankDrive(c_driveController.getLeftY(), c_driveController.getRightY());
       }
     }
     
-    //launcher
-    if (triggerHappy){
-      m_moonLauncher.set(c_stuffController.getRightTriggerAxis()*0.5);
-    } else if(c_stuffController.getAButton()) {
-      m_moonLauncher.set(0.75);
-    } else {
-      m_moonLauncher.set(0);
-    }
-
+    
     // Elevator/Intake
     if (c_stuffController.getBButton()){
-      m_elevator.set(1);
-      m_intake.set(1);
+      if(spitting){
+        m_elevator.set(-0.75);
+        m_intake.set(-1);
+      } else {
+        m_elevator.set(0.75);
+        m_intake.set(1);
+      }
     } else {
       m_elevator.set(0);
       m_intake.set(0);
     }
 
     // Climber
-    m_climb.set(c_stuffController.getLeftY());
-
-
-   
+    m_climb.set(-c_stuffController.getLeftY());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -426,6 +369,5 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     //m_myRobot.tankDrive(-m_controller.getLeftY(), m_controller.getRightY());
-    m_myRobot.arcadeDrive(c_driveController.getLeftX(), -c_driveController.getLeftY());
   }
 }
