@@ -14,7 +14,9 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -39,6 +41,8 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private Timer auto;
+
+  private PowerDistribution m_pdp;
   
   // Drivetrain Controllers
   private DifferentialDrive m_myRobot;
@@ -93,12 +97,13 @@ public class Robot extends TimedRobot {
   NetworkTableEntry tx = table.getEntry("tx");
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
+  // NetworkTableEntry ts = table.getEntry("ts");
 
-  //Odometry mess
-   // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
- //   RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-    // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+  // Odometry mess
+  // RelativeEncoder frontLeftEncoder = m_frontLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+  // RelativeEncoder rearLeftEncoder = m_rearLeft.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+  // RelativeEncoder frontRightEncoder = m_frontRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+  // RelativeEncoder rearRightEncoder = m_rearRight.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -161,7 +166,7 @@ public class Robot extends TimedRobot {
     
     System.out.println(ally);
     
-    //m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
+    m_pdp = new PowerDistribution(0, ModuleType.kCTRE);
 
   }
 
@@ -182,6 +187,7 @@ public class Robot extends TimedRobot {
     // rotation = new Rotation2d(yaw);
      
     SmartDashboard.putNumber("Uptime", uptime);
+    SmartDashboard.putNumber("TotalVoltage", m_pdp.getVoltage());
 
     //Trigger values
     driveLeftTrigger = c_driveController.getLeftTriggerAxis();
@@ -193,17 +199,19 @@ public class Robot extends TimedRobot {
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
+    // double skew = ts.getDouble(0.0);
 
     SmartDashboard.putNumber("LimelightX", x);
     SmartDashboard.putNumber("LimelightY", y);
-    SmartDashboard.putNumber("LimelightArea", area);
-
-    //leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
-   // leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
-    // rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
-   // rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
+    SmartDashboard.putNumber("LimelightArea", area); 
+    // SmartDashboard.putNumber("LimelightSkew", skew);
     
-  //  m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
+    // leftDistanceTurned = frontLeftEncoder.getPosition()*wheelCircumference-leftPreviousPos;
+    // leftPreviousPos = frontLeftEncoder.getPosition()*wheelCircumference;
+    // rightDistanceTurned = frontRightEncoder.getPosition()*wheelCircumference-rightPreviousPos;
+    // rightPreviousPos = frontRightEncoder.getPosition()*wheelCircumference;
+    
+    // m_odometry.update(rotation, leftPreviousPos, rightPreviousPos);
 
   }
 
@@ -223,6 +231,7 @@ public class Robot extends TimedRobot {
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
     table.getEntry("camMode").setNumber(0);
+    table.getEntry("ledMode").setNumber(3);
   }
 
   /** This function is called periodically during autonomous. */
@@ -265,6 +274,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     table.getEntry("camMode").setNumber(1);
+    table.getEntry("ledMode").setNumber(1);
   }
 
   /** This function is called periodically during operator control. */
