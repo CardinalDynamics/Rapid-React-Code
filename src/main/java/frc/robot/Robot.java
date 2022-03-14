@@ -44,19 +44,25 @@ public class Robot extends TimedRobot {
 
   private PowerDistribution m_pdp;
   
-  // Drivetrain Controllers
   private DifferentialDrive m_myRobot;
-  private CANSparkMax m_frontLeft;
-  private CANSparkMax m_frontRight;
-  private CANSparkMax m_rearLeft;
-  private CANSparkMax m_rearRight;
 
-  // Motor Controllers for Elevator and Intake
-  private PWMVictorSPX m_elevator;
-  private PWMVictorSPX m_intake;
+  // Drivetrain Motor Controllers
+  private final CANSparkMax m_frontLeft = 
+    new CANSparkMax(4, MotorType.kBrushless);
+  private final CANSparkMax m_frontRight = 
+    new CANSparkMax(2, MotorType.kBrushless);
+  private final CANSparkMax m_rearLeft = 
+    new CANSparkMax(3, MotorType.kBrushless);
+  private final CANSparkMax m_rearRight = 
+    new CANSparkMax(5, MotorType.kBrushless);
   
-  // Climber Motor Controller
-  private PWMVictorSPX m_climb;
+  // Motor Controllers for Elevator and Intake
+  private final PWMVictorSPX m_intake = 
+    new PWMVictorSPX(2);
+  private final PWMVictorSPX m_climb =
+    new PWMVictorSPX(3);
+  private final PWMVictorSPX m_elevator = 
+    new PWMVictorSPX(4);  
 
   // Drivetrain Motor Controller Groups
   private MotorControllerGroup m_left;
@@ -133,10 +139,7 @@ public class Robot extends TimedRobot {
     //SmartDashboard.putData("Auto choices", m_chooser);
 
     //drive motors
-    m_frontLeft = new CANSparkMax(4, MotorType.kBrushless);
-    m_frontRight = new CANSparkMax(2, MotorType.kBrushless);
-    m_rearLeft = new CANSparkMax(3, MotorType.kBrushless);
-    m_rearRight = new CANSparkMax(5, MotorType.kBrushless);
+    
     
     m_frontLeft.restoreFactoryDefaults();
     m_frontRight.restoreFactoryDefaults();
@@ -147,11 +150,6 @@ public class Robot extends TimedRobot {
     m_right = new MotorControllerGroup(m_frontRight, m_rearRight);
     m_left.setInverted(true);
     m_myRobot = new DifferentialDrive(m_left, m_right);
-
-    //Stuff
-    m_intake = new PWMVictorSPX(2);
-    m_elevator = new PWMVictorSPX(4);
-    m_climb = new PWMVictorSPX(3);
 
     table.getEntry("stream").setNumber(0);
     table.getEntry("camMode").setNumber(0);
